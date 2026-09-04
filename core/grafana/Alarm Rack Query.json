@@ -1,0 +1,421 @@
+﻿{
+    "annotations":  {
+                        "list":  [
+                                     {
+                                         "builtIn":  1,
+                                         "datasource":  {
+                                                            "type":  "grafana",
+                                                            "uid":  "-- Grafana --"
+                                                        },
+                                         "enable":  true,
+                                         "hide":  true,
+                                         "iconColor":  "rgba(0, 211, 255, 1)",
+                                         "name":  "Annotations \u0026 Alerts",
+                                         "type":  "dashboard"
+                                     }
+                                 ]
+                    },
+    "editable":  true,
+    "fiscalYearStartMonth":  0,
+    "graphTooltip":  0,
+    "id":  null,
+    "links":  [
+
+              ],
+    "liveNow":  false,
+    "panels":  [
+                   {
+                       "datasource":  {
+                                          "type":  "mssql",
+                                          "uid":  "${DS_MSSQL}"
+                                      },
+                       "description":  "",
+                       "fieldConfig":  {
+                                           "defaults":  {
+                                                            "color":  {
+                                                                          "mode":  "thresholds"
+                                                                      },
+                                                            "decimals":  1,
+                                                            "fieldMinMax":  false,
+                                                            "mappings":  [
+
+                                                                         ],
+                                                            "thresholds":  {
+                                                                               "mode":  "absolute",
+                                                                               "steps":  [
+                                                                                             {
+                                                                                                 "color":  "#646464",
+                                                                                                 "value":  null
+                                                                                             }
+                                                                                         ]
+                                                                           },
+                                                            "unit":  "volt"
+                                                        },
+                                           "overrides":  [
+                                                             {
+                                                                 "matcher":  {
+                                                                                 "id":  "byName",
+                                                                                 "options":  "pallet_status"
+                                                                             },
+                                                                 "properties":  [
+                                                                                    {
+                                                                                        "id":  "mappings",
+                                                                                        "value":  [
+                                                                                                      {
+                                                                                                          "options":  {
+                                                                                                                          "0":  {
+                                                                                                                                    "color":  "#646464",
+                                                                                                                                    "index":  0
+                                                                                                                                },
+                                                                                                                          "1":  {
+                                                                                                                                    "color":  "light-blue",
+                                                                                                                                    "index":  1
+                                                                                                                                },
+                                                                                                                          "2":  {
+                                                                                                                                    "color":  "light-red",
+                                                                                                                                    "index":  2
+                                                                                                                                }
+                                                                                                                      },
+                                                                                                          "type":  "value"
+                                                                                                      }
+                                                                                                  ]
+                                                                                    }
+                                                                                ]
+                                                             }
+                                                         ]
+                                       },
+                       "gridPos":  {
+                                       "h":  2,
+                                       "w":  12,
+                                       "x":  0,
+                                       "y":  0
+                                   },
+                       "id":  357,
+                       "links":  [
+                                     {
+                                         "targetBlank":  true,
+                                         "title":  "",
+                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=1s\u0026from=now-30s\u0026to=now\u0026var-rack_id=${alarm_rack_list}\u0026var-ip=${ip}"
+                                     }
+                                 ],
+                       "maxPerRow":  2,
+                       "options":  {
+                                       "colorMode":  "background_solid",
+                                       "graphMode":  "none",
+                                       "justifyMode":  "center",
+                                       "orientation":  "auto",
+                                       "percentChangeColorMode":  "standard",
+                                       "reduceOptions":  {
+                                                             "calcs":  [
+                                                                           "allValues"
+                                                                       ],
+                                                             "fields":  "",
+                                                             "values":  true
+                                                         },
+                                       "showPercentChange":  false,
+                                       "textMode":  "none",
+                                       "wideLayout":  true
+                                   },
+                       "pluginVersion":  "11.2.0",
+                       "repeat":  "alarm_rack_list",
+                       "repeatDirection":  "h",
+                       "targets":  [
+                                       {
+                                           "dataset":  "BALPS",
+                                           "datasource":  {
+                                                              "type":  "mssql",
+                                                              "uid":  "${DS_MSSQL}"
+                                                          },
+                                           "editorMode":  "code",
+                                           "format":  "table",
+                                           "rawQuery":  true,
+                                           "rawSql":  "SELECT pallet_id,\r\n       pallet_status\r\nFROM RackStatus\r\nWHERE rack_id IN (${alarm_rack_list:csv})\r\n  AND (\r\n        pallet_status = 0\r\n        OR DATEDIFF(SECOND, last_update_time, GETDATE()) \u003c= 15\r\n      )\r\n",
+                                           "refId":  "A",
+                                           "sql":  {
+                                                       "columns":  [
+                                                                       {
+                                                                           "parameters":  [
+
+                                                                                          ],
+                                                                           "type":  "function"
+                                                                       }
+                                                                   ],
+                                                       "groupBy":  [
+                                                                       {
+                                                                           "property":  {
+                                                                                            "type":  "string"
+                                                                                        },
+                                                                           "type":  "groupBy"
+                                                                       }
+                                                                   ],
+                                                       "limit":  50
+                                                   }
+                                       }
+                                   ],
+                       "title":  "H_00${alarm_rack_list}",
+                       "type":  "stat"
+                   }
+               ],
+    "refresh":  "5s",
+    "schemaVersion":  39,
+    "tags":  [
+
+             ],
+    "templating":  {
+                       "list":  [
+                                    {
+                                        "allowCustomValue":  false,
+                                        "current":  {
+                                                        "selected":  false,
+                                                        "text":  "StoreHouseMeasData",
+                                                        "value":  "StoreHouseMeasData"
+                                                    },
+                                        "hide":  2,
+                                        "includeAll":  false,
+                                        "multi":  false,
+                                        "name":  "bucket",
+                                        "options":  [
+                                                        {
+                                                            "selected":  true,
+                                                            "text":  "StoreHouseMeasData",
+                                                            "value":  "StoreHouseMeasData"
+                                                        }
+                                                    ],
+                                        "query":  "StoreHouseMeasData",
+                                        "skipUrlSync":  false,
+                                        "type":  "custom"
+                                    },
+                                    {
+                                        "current":  {
+                                                        "selected":  false,
+                                                        "text":  "meas_data",
+                                                        "value":  "meas_data"
+                                                    },
+                                        "hide":  2,
+                                        "includeAll":  false,
+                                        "label":  "Measurement",
+                                        "multi":  false,
+                                        "name":  "meas",
+                                        "options":  [
+                                                        {
+                                                            "selected":  true,
+                                                            "text":  "meas_data",
+                                                            "value":  "meas_data"
+                                                        }
+                                                    ],
+                                        "query":  "meas_data",
+                                        "skipUrlSync":  false,
+                                        "type":  "custom"
+                                    },
+                                    {
+                                        "current":  {
+
+                                                    },
+                                        "datasource":  {
+                                                           "type":  "influxdb",
+                                                           "uid":  "${DS_INFLUXDB}"
+                                                       },
+                                        "definition":  "from(bucket: \"${bucket}\")\r\n  |\u003e range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |\u003e filter(fn: (r) =\u003e r[\"_measurement\"] == \"${meas}\")\r\n  |\u003e filter(fn: (r) =\u003e r[\"_field\"] == \"voltage\")\r\n  |\u003e group(columns: [])\r\n  |\u003e distinct(column: \"qrcode\")\r\n  |\u003e count(column: \"_value\")",
+                                        "hide":  2,
+                                        "includeAll":  false,
+                                        "label":  "Devices",
+                                        "multi":  false,
+                                        "name":  "devices",
+                                        "options":  [
+
+                                                    ],
+                                        "query":  "from(bucket: \"${bucket}\")\r\n  |\u003e range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |\u003e filter(fn: (r) =\u003e r[\"_measurement\"] == \"${meas}\")\r\n  |\u003e filter(fn: (r) =\u003e r[\"_field\"] == \"voltage\")\r\n  |\u003e group(columns: [])\r\n  |\u003e distinct(column: \"qrcode\")\r\n  |\u003e count(column: \"_value\")",
+                                        "refresh":  2,
+                                        "regex":  "",
+                                        "skipUrlSync":  false,
+                                        "sort":  0,
+                                        "type":  "query"
+                                    },
+                                    {
+                                        "allValue":  "",
+                                        "current":  {
+
+                                                    },
+                                        "datasource":  {
+                                                           "type":  "influxdb",
+                                                           "uid":  "${DS_INFLUXDB}"
+                                                       },
+                                        "definition":  "import \"influxdata/influxdb/schema\"\r\n\r\nschema.tagValues(\r\n  bucket: \"${bucket}\",\r\n  predicate: (r) =\u003e r._measurement == \"${meas}\",\r\n  tag: \"qrcode\"\r\n)\r\n|\u003e map(fn: (r) =\u003e ({_value: r._value}))\r\n",
+                                        "hide":  2,
+                                        "includeAll":  true,
+                                        "label":  "QRcode",
+                                        "multi":  true,
+                                        "name":  "qrcode",
+                                        "options":  [
+
+                                                    ],
+                                        "query":  "import \"influxdata/influxdb/schema\"\r\n\r\nschema.tagValues(\r\n  bucket: \"${bucket}\",\r\n  predicate: (r) =\u003e r._measurement == \"${meas}\",\r\n  tag: \"qrcode\"\r\n)\r\n|\u003e map(fn: (r) =\u003e ({_value: r._value}))\r\n",
+                                        "refresh":  2,
+                                        "regex":  "",
+                                        "skipUrlSync":  false,
+                                        "sort":  0,
+                                        "type":  "query"
+                                    },
+                                    {
+                                        "allValue":  "",
+                                        "current":  {
+
+                                                    },
+                                        "datasource":  {
+                                                           "type":  "influxdb",
+                                                           "uid":  "${DS_INFLUXDB}"
+                                                       },
+                                        "definition":  "import \"influxdata/influxdb/schema\"\r\n\r\nschema.tagValues(\r\n  bucket: \"${bucket}\",\r\n  predicate: (r) =\u003e r._measurement == \"${meas}\",\r\n  tag: \"serialboard_id\"\r\n)\r\n|\u003e map(fn: (r) =\u003e ({_value: r._value}))",
+                                        "hide":  2,
+                                        "includeAll":  true,
+                                        "label":  "Serialboard_ID",
+                                        "multi":  true,
+                                        "name":  "sb_id",
+                                        "options":  [
+
+                                                    ],
+                                        "query":  "import \"influxdata/influxdb/schema\"\r\n\r\nschema.tagValues(\r\n  bucket: \"${bucket}\",\r\n  predicate: (r) =\u003e r._measurement == \"${meas}\",\r\n  tag: \"serialboard_id\"\r\n)\r\n|\u003e map(fn: (r) =\u003e ({_value: r._value}))",
+                                        "refresh":  2,
+                                        "regex":  "",
+                                        "skipUrlSync":  false,
+                                        "sort":  1,
+                                        "type":  "query"
+                                    },
+                                    {
+                                        "allValue":  "",
+                                        "current":  {
+
+                                                    },
+                                        "datasource":  {
+                                                           "type":  "influxdb",
+                                                           "uid":  "${DS_INFLUXDB}"
+                                                       },
+                                        "definition":  "import \"influxdata/influxdb/schema\"\r\n\r\nschema.tagValues(\r\n  bucket: \"${bucket}\",\r\n  predicate: (r) =\u003e r._measurement == \"${meas}\",\r\n  tag: \"storehouse_id\"\r\n)\r\n|\u003e map(fn: (r) =\u003e ({_value: r._value}))",
+                                        "hide":  2,
+                                        "includeAll":  true,
+                                        "label":  "RackID",
+                                        "multi":  true,
+                                        "name":  "sh_id",
+                                        "options":  [
+
+                                                    ],
+                                        "query":  "import \"influxdata/influxdb/schema\"\r\n\r\nschema.tagValues(\r\n  bucket: \"${bucket}\",\r\n  predicate: (r) =\u003e r._measurement == \"${meas}\",\r\n  tag: \"storehouse_id\"\r\n)\r\n|\u003e map(fn: (r) =\u003e ({_value: r._value}))",
+                                        "refresh":  2,
+                                        "regex":  "",
+                                        "skipUrlSync":  false,
+                                        "sort":  0,
+                                        "type":  "query"
+                                    },
+                                    {
+                                        "allowCustomValue":  false,
+                                        "current":  {
+
+                                                    },
+                                        "datasource":  {
+                                                           "type":  "mssql",
+                                                           "uid":  "${DS_MSSQL}"
+                                                       },
+                                        "definition":  "WITH raw AS (\n  SELECT \u0027${sh_id:csv}\u0027 AS expr\n),\nsplit_expr AS (\n  SELECT r.expr, LTRIM(RTRIM(s.value)) AS value\n  FROM raw r\n  CROSS APPLY STRING_SPLIT(r.expr, \u0027,\u0027) AS s\n)\nSELECT \n  CASE \n    WHEN MIN(LTRIM(RTRIM(expr))) IN (\u0027All\u0027) THEN \u0027true\u0027\n    ELSE STRING_AGG(\u0027r[\"storehouse_id\"] == \"\u0027 + value + \u0027\"\u0027, \u0027 or \u0027)\n  END AS result\nFROM split_expr;",
+                                        "description":  "",
+                                        "hide":  2,
+                                        "includeAll":  false,
+                                        "multi":  false,
+                                        "name":  "sh_pars_id",
+                                        "options":  [
+
+                                                    ],
+                                        "query":  "WITH raw AS (\n  SELECT \u0027${sh_id:csv}\u0027 AS expr\n),\nsplit_expr AS (\n  SELECT r.expr, LTRIM(RTRIM(s.value)) AS value\n  FROM raw r\n  CROSS APPLY STRING_SPLIT(r.expr, \u0027,\u0027) AS s\n)\nSELECT \n  CASE \n    WHEN MIN(LTRIM(RTRIM(expr))) IN (\u0027All\u0027) THEN \u0027true\u0027\n    ELSE STRING_AGG(\u0027r[\"storehouse_id\"] == \"\u0027 + value + \u0027\"\u0027, \u0027 or \u0027)\n  END AS result\nFROM split_expr;",
+                                        "refresh":  2,
+                                        "regex":  "",
+                                        "skipUrlSync":  false,
+                                        "sort":  0,
+                                        "type":  "query"
+                                    },
+                                    {
+                                        "allValue":  "999999",
+                                        "current":  {
+
+                                                    },
+                                        "datasource":  {
+                                                           "type":  "mssql",
+                                                           "uid":  "${DS_MSSQL}"
+                                                       },
+                                        "definition":  "SELECT rack_id\nFROM RackStatus\nWHERE pallet_status = 2",
+                                        "hide":  2,
+                                        "includeAll":  true,
+                                        "label":  "Alarm_Rack",
+                                        "multi":  true,
+                                        "name":  "alarm_rack_list",
+                                        "options":  [
+
+                                                    ],
+                                        "query":  "SELECT rack_id\nFROM RackStatus\nWHERE pallet_status = 2",
+                                        "refresh":  2,
+                                        "regex":  "",
+                                        "skipUrlSync":  false,
+                                        "sort":  0,
+                                        "type":  "query"
+                                    },
+                                    {
+                                        "current":  {
+                                                        "selected":  false,
+                                                        "text":  "192.168.127.100",
+                                                        "value":  "192.168.127.100"
+                                                    },
+                                        "hide":  2,
+                                        "name":  "ip",
+                                        "options":  [
+
+                                                    ],
+                                        "query":  "192.168.127.100",
+                                        "skipUrlSync":  false,
+                                        "type":  "textbox"
+                                    }
+                                ]
+                   },
+    "time":  {
+                 "from":  "now-1h",
+                 "to":  "now"
+             },
+    "timepicker":  {
+                       "hidden":  false,
+                       "refresh_intervals":  [
+                                                 "1s",
+                                                 "3s",
+                                                 "5s",
+                                                 "20s",
+                                                 "10s",
+                                                 "30s",
+                                                 "1m",
+                                                 "5m",
+                                                 "15m",
+                                                 "30m",
+                                                 "1h",
+                                                 "2h",
+                                                 "1d"
+                                             ]
+                   },
+    "timezone":  "",
+    "title":  "Alarm Rack Query",
+    "uid":  "4037602e-1d0a-41fc-ab22-896bc2e8fe9b",
+    "version":  4,
+    "weekStart":  "",
+    "__inputs":  [
+                     {
+                         "name":  "DS_MSSQL",
+                         "label":  "MSSQL",
+                         "description":  "",
+                         "type":  "datasource",
+                         "pluginId":  "mssql",
+                         "pluginName":  "Microsoft SQL Server"
+                     },
+                     {
+                         "name":  "DS_INFLUXDB",
+                         "label":  "InfluxDB",
+                         "description":  "",
+                         "type":  "datasource",
+                         "pluginId":  "influxdb",
+                         "pluginName":  "InfluxDB"
+                     }
+                 ]
+}

@@ -1,0 +1,236 @@
+﻿{
+    "annotations":  {
+                        "list":  [
+                                     {
+                                         "builtIn":  1,
+                                         "datasource":  {
+                                                            "type":  "grafana",
+                                                            "uid":  "-- Grafana --"
+                                                        },
+                                         "enable":  true,
+                                         "hide":  true,
+                                         "iconColor":  "rgba(0, 211, 255, 1)",
+                                         "name":  "Annotations \u0026 Alerts",
+                                         "type":  "dashboard"
+                                     }
+                                 ]
+                    },
+    "editable":  true,
+    "fiscalYearStartMonth":  0,
+    "graphTooltip":  0,
+    "id":  null,
+    "links":  [
+
+              ],
+    "panels":  [
+                   {
+                       "datasource":  {
+                                          "type":  "influxdb",
+                                          "uid":  "${DS_INFLUXDB}"
+                                      },
+                       "gridPos":  {
+                                       "h":  11,
+                                       "w":  6,
+                                       "x":  0,
+                                       "y":  0
+                                   },
+                       "id":  2,
+                       "options":  {
+                                       "code":  {
+                                                    "language":  "plaintext",
+                                                    "showLineNumbers":  false,
+                                                    "showMiniMap":  false
+                                                },
+                                       "content":  "\u003ch2 style=\"text-align: left; font-size: 32px; color: #FFD700;\"\u003e\n  RealTime\n\u003c/h2\u003e\n\u003cdiv style=\"margin-bottom: 5px; text-align: left;\"\u003e\n\u003ca href=\"http://${ip}:3000/d/cerdu2ezr0kqob/realtime-rack-data?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-ip=${ip}\" target=\"_blank\" style=\"font-size:32px;\"\u003e\nAll Rack View\n\u003c/a\u003e\n\u003c/div\u003e\n\u003cbr\u003e\n\u003cdiv style=\"margin-bottom: 5px; text-align: left;\"\u003e\n\u003ca href=\"http://${ip}:3000/d/4037602e-1d0a-41fc-ab22-896bc2e8fe9b/alarm-rack-query?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-ip=${ip}\" target=\"_blank\" style=\"font-size:32px;\"\u003e\nAlarm Rack View\n\u003c/a\u003e\n\u003c/div\u003e",
+                                       "mode":  "markdown"
+                                   },
+                       "pluginVersion":  "11.2.0",
+                       "targets":  [
+                                       {
+                                           "datasource":  {
+                                                              "type":  "influxdb",
+                                                              "uid":  "${DS_INFLUXDB}"
+                                                          },
+                                           "refId":  "A"
+                                       }
+                                   ],
+                       "transparent":  true,
+                       "type":  "text"
+                   },
+                   {
+                       "datasource":  {
+                                          "type":  "influxdb",
+                                          "uid":  "${DS_INFLUXDB}"
+                                      },
+                       "gridPos":  {
+                                       "h":  11,
+                                       "w":  8,
+                                       "x":  6,
+                                       "y":  0
+                                   },
+                       "id":  1,
+                       "options":  {
+                                       "code":  {
+                                                    "language":  "plaintext",
+                                                    "showLineNumbers":  false,
+                                                    "showMiniMap":  false
+                                                },
+                                       "content":  "\u003ch2 style=\"text-align: left; font-size: 32px; color: #FFD700;\"\u003e\n  Query Data\n\u003c/h2\u003e\n\u003cdiv style=\"margin-bottom: 5px;\"\u003e\n\u003ca href=\"http://${ip}:3000/d/efvfpnl6ca5tsc/serialboardid-data-query?orgId=1\u0026refresh=5s\u0026from=now-24h\u0026to=now\u0026var-ip=${ip}\" target=\"_blank\" style=\"font-size:32px;\"\u003e\nSerialboardID Search\n\u003c/a\u003e\n\u003c/div\u003e\n\u003cbr\u003e\n\u003cdiv style=\"margin-bottom: 5px;\"\u003e\n\u003ca href=\"http://${ip}:3000/d/feraqp09oos1sd/cell-data-query?orgId=1\u0026refresh=5s\u0026from=now-24h\u0026to=now\u0026var-ip=${ip}\" target=\"_blank\" style=\"font-size:32px;\"\u003e\nQRCode Search\n\u003c/a\u003e\n\u003c/div\u003e\n\u003cbr\u003e\n\u003cdiv style=\"margin-bottom: 5px;\"\u003e\n\u003ca href=\"http://${ip}:3000/d/ffv4y4orqez9ce/rack-data-query?orgId=1\u0026refresh=5s\u0026from=now-24h\u0026to=now\u0026var-ip=${ip}\" target=\"_blank\" style=\"font-size:32px;\"\u003e\nRackID Search\n\u003c/a\u003e\n\u003c/div\u003e",
+                                       "mode":  "markdown"
+                                   },
+                       "pluginVersion":  "11.2.0",
+                       "targets":  [
+                                       {
+                                           "datasource":  {
+                                                              "type":  "influxdb",
+                                                              "uid":  "${DS_INFLUXDB}"
+                                                          },
+                                           "refId":  "A"
+                                       }
+                                   ],
+                       "transparent":  true,
+                       "type":  "text"
+                   },
+                   {
+                       "datasource":  {
+                                          "type":  "influxdb",
+                                          "uid":  "${DS_INFLUXDB}"
+                                      },
+                       "gridPos":  {
+                                       "h":  9,
+                                       "w":  6,
+                                       "x":  14,
+                                       "y":  0
+                                   },
+                       "id":  3,
+                       "options":  {
+                                       "code":  {
+                                                    "language":  "plaintext",
+                                                    "showLineNumbers":  false,
+                                                    "showMiniMap":  false
+                                                },
+                                       "content":  "\u003ch2 style=\"text-align: left; font-size: 32px; color: #FFD700;\"\u003e\n  System\n\u003c/h2\u003e\n\u003cdiv style=\"margin-bottom: 5px;\"\u003e\n\u003ca href=\"http://${ip}:3000/d/cer9qt2afesqob/logger-data?orgId=1\u0026from=now-1m\u0026to=now\u0026var-ip=${ip}\" target=\"_blank\" style=\"font-size:32px;\"\u003e\nLogger View (limit)\n\u003c/a\u003e\n\u003c/div\u003e\n\u003cbr\u003e\n\u003cdiv style=\"margin-bottom: 5px;\"\u003e\n\u003ca href=\"http://${ip}:3000/d/fevmnlwkksy68f/logger-data-unlimit?orgId=1\u0026from=now-1m\u0026to=now\u0026var-ip=${ip}\" target=\"_blank\" style=\"font-size:32px;\"\u003e\nLogger View\n\u003c/a\u003e\n\u003c/div\u003e\n\u003cbr\u003e\n\u003cdiv style=\"margin-bottom: 5px;\"\u003e\n\u003ca href=\"http://${ip}:3000/d/devg2iujkg2dcb/heartbeat-data-query?orgId=1\u0026var-bucket=StoreHouseMeasData\u0026var-meas=perf\u0026var-rack_id=1\u0026var-sb_id=All\u0026var-sh_id=All\u0026var-sb_flux\u0026var-sh_flux\u0026var-ip=${ip}\u0026refresh=1s\u0026from=1755655920000\u0026to=now\" target=\"_blank\" style=\"font-size:32px;\"\u003e\nHeartbeat View\n\u003c/a\u003e\n\u003c/div\u003e\n",
+                                       "mode":  "markdown"
+                                   },
+                       "pluginVersion":  "11.2.0",
+                       "targets":  [
+                                       {
+                                           "datasource":  {
+                                                              "type":  "influxdb",
+                                                              "uid":  "${DS_INFLUXDB}"
+                                                          },
+                                           "refId":  "A"
+                                       }
+                                   ],
+                       "transparent":  true,
+                       "type":  "text"
+                   }
+               ],
+    "schemaVersion":  39,
+    "tags":  [
+
+             ],
+    "templating":  {
+                       "list":  [
+                                    {
+                                        "current":  {
+                                                        "selected":  false,
+                                                        "text":  "192.168.127.100",
+                                                        "value":  "192.168.127.100"
+                                                    },
+                                        "hide":  0,
+                                        "name":  "ip",
+                                        "options":  [
+                                                        {
+                                                            "selected":  true,
+                                                            "text":  "192.168.127.100",
+                                                            "value":  "192.168.127.100"
+                                                        }
+                                                    ],
+                                        "query":  "192.168.127.100",
+                                        "skipUrlSync":  false,
+                                        "type":  "textbox"
+                                    },
+                                    {
+                                        "current":  {
+                                                        "selected":  false,
+                                                        "text":  "1784552335000",
+                                                        "value":  "1784552335000"
+                                                    },
+                                        "datasource":  {
+                                                           "type":  "mssql",
+                                                           "uid":  "${DS_MSSQL}"
+                                                       },
+                                        "definition":  "Select CAST(DATEDIFF(SECOND, \u00271970-01-01\u0027, DATEADD(HOUR, 0, CAST(GETDATE() AS DATETIME))) AS BIGINT) * 1000 AS StartOfDayEpochMs",
+                                        "hide":  2,
+                                        "includeAll":  false,
+                                        "multi":  false,
+                                        "name":  "start_time",
+                                        "options":  [
+
+                                                    ],
+                                        "query":  "Select CAST(DATEDIFF(SECOND, \u00271970-01-01\u0027, DATEADD(HOUR, 0, CAST(GETDATE() AS DATETIME))) AS BIGINT) * 1000 AS StartOfDayEpochMs",
+                                        "refresh":  2,
+                                        "regex":  "",
+                                        "skipUrlSync":  false,
+                                        "sort":  0,
+                                        "type":  "query"
+                                    },
+                                    {
+                                        "current":  {
+                                                        "selected":  false,
+                                                        "text":  "1784609935000",
+                                                        "value":  "1784609935000"
+                                                    },
+                                        "datasource":  {
+                                                           "type":  "mssql",
+                                                           "uid":  "${DS_MSSQL}"
+                                                       },
+                                        "definition":  "SELECT CAST(DATEDIFF(SECOND, \u00271970-01-01\u0027,\n        DATEADD(HOUR, -8, DATEADD(DAY, 1, CAST(GETDATE() AS DATETIME)))\n    ) AS BIGINT) * 1000 AS EndOfDayEpochMs",
+                                        "hide":  2,
+                                        "includeAll":  false,
+                                        "multi":  false,
+                                        "name":  "end_time",
+                                        "options":  [
+
+                                                    ],
+                                        "query":  "SELECT CAST(DATEDIFF(SECOND, \u00271970-01-01\u0027,\n        DATEADD(HOUR, -8, DATEADD(DAY, 1, CAST(GETDATE() AS DATETIME)))\n    ) AS BIGINT) * 1000 AS EndOfDayEpochMs",
+                                        "refresh":  2,
+                                        "regex":  "",
+                                        "skipUrlSync":  false,
+                                        "sort":  0,
+                                        "type":  "query"
+                                    }
+                                ]
+                   },
+    "time":  {
+                 "from":  "now-6h",
+                 "to":  "now"
+             },
+    "timepicker":  {
+
+                   },
+    "timezone":  "browser",
+    "title":  "Main Control Dashboard",
+    "uid":  "eeu9bam8lt14wa",
+    "version":  8,
+    "weekStart":  "",
+    "__inputs":  [
+                     {
+                         "name":  "DS_INFLUXDB",
+                         "label":  "InfluxDB",
+                         "description":  "",
+                         "type":  "datasource",
+                         "pluginId":  "influxdb",
+                         "pluginName":  "InfluxDB"
+                     },
+                     {
+                         "name":  "DS_MSSQL",
+                         "label":  "MSSQL",
+                         "description":  "",
+                         "type":  "datasource",
+                         "pluginId":  "mssql",
+                         "pluginName":  "Microsoft SQL Server"
+                     }
+                 ]
+}

@@ -1,0 +1,10 @@
+*.pyc
+.venv/*
+*.exe
+*.log*
+*.zip
+barcode_scanner
+docs/*
+*.bat
+bin/*
+logs/*

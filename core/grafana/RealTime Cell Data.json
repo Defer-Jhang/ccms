@@ -1,0 +1,751 @@
+﻿{
+    "annotations":  {
+                        "list":  [
+                                     {
+                                         "builtIn":  1,
+                                         "datasource":  {
+                                                            "type":  "grafana",
+                                                            "uid":  "-- Grafana --"
+                                                        },
+                                         "enable":  true,
+                                         "hide":  true,
+                                         "iconColor":  "rgba(0, 211, 255, 1)",
+                                         "name":  "Annotations \u0026 Alerts",
+                                         "type":  "dashboard"
+                                     }
+                                 ]
+                    },
+    "editable":  true,
+    "fiscalYearStartMonth":  0,
+    "graphTooltip":  0,
+    "id":  null,
+    "links":  [
+
+              ],
+    "panels":  [
+                   {
+                       "datasource":  {
+                                          "type":  "influxdb",
+                                          "uid":  "${DS_INFLUXDB}"
+                                      },
+                       "description":  "",
+                       "fieldConfig":  {
+                                           "defaults":  {
+                                                            "color":  {
+                                                                          "mode":  "palette-classic"
+                                                                      },
+                                                            "custom":  {
+                                                                           "axisBorderShow":  false,
+                                                                           "axisCenteredZero":  false,
+                                                                           "axisColorMode":  "text",
+                                                                           "axisLabel":  "",
+                                                                           "axisPlacement":  "auto",
+                                                                           "barAlignment":  0,
+                                                                           "barWidthFactor":  0.6,
+                                                                           "drawStyle":  "line",
+                                                                           "fillOpacity":  0,
+                                                                           "gradientMode":  "none",
+                                                                           "hideFrom":  {
+                                                                                            "legend":  false,
+                                                                                            "tooltip":  false,
+                                                                                            "viz":  false
+                                                                                        },
+                                                                           "insertNulls":  false,
+                                                                           "lineInterpolation":  "linear",
+                                                                           "lineWidth":  1,
+                                                                           "pointSize":  5,
+                                                                           "scaleDistribution":  {
+                                                                                                     "type":  "linear"
+                                                                                                 },
+                                                                           "showPoints":  "auto",
+                                                                           "spanNulls":  false,
+                                                                           "stacking":  {
+                                                                                            "group":  "A",
+                                                                                            "mode":  "none"
+                                                                                        },
+                                                                           "thresholdsStyle":  {
+                                                                                                   "mode":  "off"
+                                                                                               }
+                                                                       },
+                                                            "decimals":  3,
+                                                            "mappings":  [
+
+                                                                         ],
+                                                            "thresholds":  {
+                                                                               "mode":  "absolute",
+                                                                               "steps":  [
+                                                                                             {
+                                                                                                 "color":  "green",
+                                                                                                 "value":  null
+                                                                                             },
+                                                                                             {
+                                                                                                 "color":  "red",
+                                                                                                 "value":  80
+                                                                                             }
+                                                                                         ]
+                                                                           }
+                                                        },
+                                           "overrides":  [
+
+                                                         ]
+                                       },
+                       "gridPos":  {
+                                       "h":  1,
+                                       "w":  24,
+                                       "x":  0,
+                                       "y":  0
+                                   },
+                       "id":  33,
+                       "maxDataPoints":  100000,
+                       "options":  {
+                                       "legend":  {
+                                                      "calcs":  [
+
+                                                                ],
+                                                      "displayMode":  "list",
+                                                      "placement":  "bottom",
+                                                      "showLegend":  false
+                                                  },
+                                       "tooltip":  {
+                                                       "mode":  "single",
+                                                       "sort":  "none"
+                                                   }
+                                   },
+                       "pluginVersion":  "10.4.19+security-01",
+                       "targets":  [
+                                       {
+                                           "datasource":  {
+                                                              "type":  "influxdb",
+                                                              "uid":  "${DS_INFLUXDB}"
+                                                          },
+                                           "hide":  false,
+                                           "query":  "from(bucket: \"${bucket}\")\r\n  |\u003e range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |\u003e filter(fn: (r) =\u003e r[\"_measurement\"] == \"${meas}\")\r\n  |\u003e filter(fn: (r) =\u003e ${select_export_data_list})\r\n  |\u003e filter(fn: (r) =\u003e r[\"storehouse_id\"] == \"${rack_id}\")\r\n  |\u003e filter(fn: (r) =\u003e ${qrcode})\r\n  |\u003e keep(columns: [\"_time\", \"_field\", \"_value\", \"qrcode\", \"storehouse_id\", \"serialboard_id\", \"protectboard_id\"])\r\n  |\u003e group()\r\n  |\u003e map(fn: (r) =\u003e ({\r\n      r with\r\n      _field:\r\n        if r._field == \"voltage\" then r.qrcode + \"_Volt\"\r\n        else if r._field == \"temperature\" then r.qrcode + \"_Temp\"\r\n        else if r._field == \"current\" then \"Current\"\r\n        else r._field\r\n  }))\r\n  |\u003e map(fn: (r) =\u003e ({\r\n      r with\r\n      StoreHouseID: r.storehouse_id,\r\n      SerialBoardID: r.serialboard_id,\r\n      ProtectBoardID: r.protectboard_id\r\n  }))\r\n  |\u003e pivot(rowKey: [\"_time\", \"StoreHouseID\", \"SerialBoardID\", \"ProtectBoardID\"], columnKey: [\"_field\"], valueColumn: \"_value\")\r\n  |\u003e drop(columns: [\"_start\", \"_stop\"])",
+                                           "refId":  "A"
+                                       }
+                                   ],
+                       "title":  "Export Data",
+                       "transparent":  true,
+                       "type":  "timeseries"
+                   },
+                   {
+                       "collapsed":  false,
+                       "gridPos":  {
+                                       "h":  1,
+                                       "w":  24,
+                                       "x":  0,
+                                       "y":  1
+                                   },
+                       "id":  30,
+                       "panels":  [
+
+                                  ],
+                       "title":  "${pallet} Pallet - ${serialboard_id} - ${qrcode_list:csv}",
+                       "type":  "row"
+                   },
+                   {
+                       "datasource":  {
+                                          "type":  "influxdb",
+                                          "uid":  "${DS_INFLUXDB}"
+                                      },
+                       "description":  "",
+                       "fieldConfig":  {
+                                           "defaults":  {
+                                                            "color":  {
+                                                                          "fixedColor":  "light-blue",
+                                                                          "mode":  "palette-classic",
+                                                                          "seriesBy":  "last"
+                                                                      },
+                                                            "custom":  {
+                                                                           "axisBorderShow":  false,
+                                                                           "axisCenteredZero":  false,
+                                                                           "axisColorMode":  "text",
+                                                                           "axisLabel":  "",
+                                                                           "axisPlacement":  "auto",
+                                                                           "barAlignment":  0,
+                                                                           "barWidthFactor":  0.6,
+                                                                           "drawStyle":  "line",
+                                                                           "fillOpacity":  0,
+                                                                           "gradientMode":  "none",
+                                                                           "hideFrom":  {
+                                                                                            "legend":  false,
+                                                                                            "tooltip":  false,
+                                                                                            "viz":  false
+                                                                                        },
+                                                                           "insertNulls":  false,
+                                                                           "lineInterpolation":  "linear",
+                                                                           "lineStyle":  {
+                                                                                             "fill":  "solid"
+                                                                                         },
+                                                                           "lineWidth":  1,
+                                                                           "pointSize":  5,
+                                                                           "scaleDistribution":  {
+                                                                                                     "type":  "linear"
+                                                                                                 },
+                                                                           "showPoints":  "auto",
+                                                                           "spanNulls":  false,
+                                                                           "stacking":  {
+                                                                                            "group":  "A",
+                                                                                            "mode":  "none"
+                                                                                        },
+                                                                           "thresholdsStyle":  {
+                                                                                                   "mode":  "dashed"
+                                                                                               }
+                                                                       },
+                                                            "fieldMinMax":  false,
+                                                            "mappings":  [
+
+                                                                         ],
+                                                            "thresholds":  {
+                                                                               "mode":  "absolute",
+                                                                               "steps":  [
+                                                                                             {
+                                                                                                 "color":  "light-blue",
+                                                                                                 "value":  null
+                                                                                             },
+                                                                                             {
+                                                                                                 "color":  "light-red",
+                                                                                                 "value":  4.25
+                                                                                             }
+                                                                                         ]
+                                                                           },
+                                                            "unit":  "volt"
+                                                        },
+                                           "overrides":  [
+
+                                                         ]
+                                       },
+                       "gridPos":  {
+                                       "h":  13,
+                                       "w":  13,
+                                       "x":  0,
+                                       "y":  2
+                                   },
+                       "id":  17,
+                       "links":  [
+                                     {
+                                         "targetBlank":  true,
+                                         "title":  "",
+                                         "url":  "http://${ip}:3000/d/devbrowu05xc0b/ccms-cell-detail-monitor-long-time?orgId=1\u0026refresh=5s\u0026from=now-3d\u0026to=now\u0026var-pallet=Left\u0026var-serialboard_id=${serialboard_id}\u0026var-qrcode_list=${qrcode_list:csv}\u0026var-rack_id=${rack_id}\u0026var-qrcode=${qrcode}\u0026var-ip=${ip}"
+                                     }
+                                 ],
+                       "options":  {
+                                       "legend":  {
+                                                      "calcs":  [
+
+                                                                ],
+                                                      "displayMode":  "list",
+                                                      "placement":  "bottom",
+                                                      "showLegend":  true
+                                                  },
+                                       "tooltip":  {
+                                                       "mode":  "single",
+                                                       "sort":  "desc"
+                                                   }
+                                   },
+                       "pluginVersion":  "10.4.19+security-01",
+                       "targets":  [
+                                       {
+                                           "datasource":  {
+                                                              "type":  "influxdb",
+                                                              "uid":  "${DS_INFLUXDB}"
+                                                          },
+                                           "hide":  false,
+                                           "query":  "from(bucket: \"${bucket}\")\r\n  |\u003e range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |\u003e filter(fn: (r) =\u003e r[\"_measurement\"] == \"${meas}\")\r\n  |\u003e filter(fn: (r) =\u003e r[\"_field\"] == \"voltage\")\r\n  |\u003e filter(fn: (r) =\u003e r[\"storehouse_id\"] == \"${rack_id}\")\r\n  |\u003e filter(fn: (r) =\u003e ${qrcode})\r\n  |\u003e aggregateWindow(\r\n      every: v.windowPeriod,\r\n      fn: last,\r\n      createEmpty: false\r\n  )\r\n  |\u003e keep(columns: [\"_time\", \"_value\", \"qrcode\"])\r\n  |\u003e group(columns: [\"qrcode\"])\r\n",
+                                           "refId":  "A"
+                                       }
+                                   ],
+                       "title":  "Voltage",
+                       "transparent":  true,
+                       "type":  "timeseries"
+                   },
+                   {
+                       "datasource":  {
+                                          "type":  "influxdb",
+                                          "uid":  "${DS_INFLUXDB}"
+                                      },
+                       "description":  "",
+                       "fieldConfig":  {
+                                           "defaults":  {
+                                                            "color":  {
+                                                                          "fixedColor":  "light-orange",
+                                                                          "mode":  "palette-classic"
+                                                                      },
+                                                            "custom":  {
+                                                                           "axisBorderShow":  false,
+                                                                           "axisCenteredZero":  false,
+                                                                           "axisColorMode":  "text",
+                                                                           "axisLabel":  "",
+                                                                           "axisPlacement":  "auto",
+                                                                           "barAlignment":  0,
+                                                                           "barWidthFactor":  0.6,
+                                                                           "drawStyle":  "line",
+                                                                           "fillOpacity":  0,
+                                                                           "gradientMode":  "none",
+                                                                           "hideFrom":  {
+                                                                                            "legend":  false,
+                                                                                            "tooltip":  false,
+                                                                                            "viz":  false
+                                                                                        },
+                                                                           "insertNulls":  false,
+                                                                           "lineInterpolation":  "linear",
+                                                                           "lineWidth":  1,
+                                                                           "pointSize":  5,
+                                                                           "scaleDistribution":  {
+                                                                                                     "type":  "linear"
+                                                                                                 },
+                                                                           "showPoints":  "auto",
+                                                                           "spanNulls":  false,
+                                                                           "stacking":  {
+                                                                                            "group":  "A",
+                                                                                            "mode":  "none"
+                                                                                        },
+                                                                           "thresholdsStyle":  {
+                                                                                                   "mode":  "dashed"
+                                                                                               }
+                                                                       },
+                                                            "decimals":  1,
+                                                            "mappings":  [
+
+                                                                         ],
+                                                            "thresholds":  {
+                                                                               "mode":  "absolute",
+                                                                               "steps":  [
+                                                                                             {
+                                                                                                 "color":  "light-orange",
+                                                                                                 "value":  null
+                                                                                             },
+                                                                                             {
+                                                                                                 "color":  "light-red",
+                                                                                                 "value":  45
+                                                                                             }
+                                                                                         ]
+                                                                           },
+                                                            "unit":  "celsius"
+                                                        },
+                                           "overrides":  [
+
+                                                         ]
+                                       },
+                       "gridPos":  {
+                                       "h":  19,
+                                       "w":  11,
+                                       "x":  13,
+                                       "y":  2
+                                   },
+                       "id":  31,
+                       "options":  {
+                                       "legend":  {
+                                                      "calcs":  [
+
+                                                                ],
+                                                      "displayMode":  "list",
+                                                      "placement":  "bottom",
+                                                      "showLegend":  true
+                                                  },
+                                       "tooltip":  {
+                                                       "mode":  "single",
+                                                       "sort":  "none"
+                                                   }
+                                   },
+                       "pluginVersion":  "10.4.19+security-01",
+                       "targets":  [
+                                       {
+                                           "datasource":  {
+                                                              "type":  "influxdb",
+                                                              "uid":  "${DS_INFLUXDB}"
+                                                          },
+                                           "hide":  false,
+                                           "query":  "from(bucket: \"${bucket}\")\r\n  |\u003e range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |\u003e filter(fn: (r) =\u003e r[\"_measurement\"] == \"${meas}\")\r\n  |\u003e filter(fn: (r) =\u003e r[\"_field\"] == \"temperature\")\r\n  |\u003e filter(fn: (r) =\u003e r[\"storehouse_id\"] == \"${rack_id}\")\r\n  |\u003e filter(fn: (r) =\u003e ${qrcode})\r\n  |\u003e aggregateWindow(\r\n      every: v.windowPeriod,\r\n      fn: last,\r\n      createEmpty: false\r\n  )\r\n  |\u003e keep(columns: [\"_time\", \"_value\", \"qrcode\"])\r\n  |\u003e group(columns: [\"qrcode\"])",
+                                           "refId":  "A"
+                                       }
+                                   ],
+                       "title":  "Temperature",
+                       "transparent":  true,
+                       "type":  "timeseries"
+                   },
+                   {
+                       "datasource":  {
+                                          "type":  "influxdb",
+                                          "uid":  "${DS_INFLUXDB}"
+                                      },
+                       "description":  "",
+                       "fieldConfig":  {
+                                           "defaults":  {
+                                                            "color":  {
+                                                                          "fixedColor":  "light-orange",
+                                                                          "mode":  "palette-classic"
+                                                                      },
+                                                            "custom":  {
+                                                                           "axisBorderShow":  false,
+                                                                           "axisCenteredZero":  false,
+                                                                           "axisColorMode":  "text",
+                                                                           "axisLabel":  "",
+                                                                           "axisPlacement":  "auto",
+                                                                           "barAlignment":  0,
+                                                                           "barWidthFactor":  0.6,
+                                                                           "drawStyle":  "line",
+                                                                           "fillOpacity":  0,
+                                                                           "gradientMode":  "none",
+                                                                           "hideFrom":  {
+                                                                                            "legend":  false,
+                                                                                            "tooltip":  false,
+                                                                                            "viz":  false
+                                                                                        },
+                                                                           "insertNulls":  false,
+                                                                           "lineInterpolation":  "linear",
+                                                                           "lineWidth":  1,
+                                                                           "pointSize":  5,
+                                                                           "scaleDistribution":  {
+                                                                                                     "type":  "linear"
+                                                                                                 },
+                                                                           "showPoints":  "auto",
+                                                                           "spanNulls":  false,
+                                                                           "stacking":  {
+                                                                                            "group":  "A",
+                                                                                            "mode":  "none"
+                                                                                        },
+                                                                           "thresholdsStyle":  {
+                                                                                                   "mode":  "dashed"
+                                                                                               }
+                                                                       },
+                                                            "decimals":  1,
+                                                            "mappings":  [
+
+                                                                         ],
+                                                            "max":  30,
+                                                            "min":  0,
+                                                            "thresholds":  {
+                                                                               "mode":  "absolute",
+                                                                               "steps":  [
+                                                                                             {
+                                                                                                 "color":  "green",
+                                                                                                 "value":  null
+                                                                                             },
+                                                                                             {
+                                                                                                 "color":  "light-red",
+                                                                                                 "value":  25
+                                                                                             }
+                                                                                         ]
+                                                                           },
+                                                            "unit":  "amp"
+                                                        },
+                                           "overrides":  [
+
+                                                         ]
+                                       },
+                       "gridPos":  {
+                                       "h":  6,
+                                       "w":  13,
+                                       "x":  0,
+                                       "y":  15
+                                   },
+                       "id":  32,
+                       "options":  {
+                                       "legend":  {
+                                                      "calcs":  [
+
+                                                                ],
+                                                      "displayMode":  "list",
+                                                      "placement":  "bottom",
+                                                      "showLegend":  true
+                                                  },
+                                       "tooltip":  {
+                                                       "mode":  "single",
+                                                       "sort":  "none"
+                                                   }
+                                   },
+                       "pluginVersion":  "10.4.19+security-01",
+                       "targets":  [
+                                       {
+                                           "datasource":  {
+                                                              "type":  "influxdb",
+                                                              "uid":  "${DS_INFLUXDB}"
+                                                          },
+                                           "hide":  false,
+                                           "query":  "from(bucket: \"${bucket}\")\r\n  |\u003e range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |\u003e filter(fn: (r) =\u003e r[\"_measurement\"] == \"${meas}\")\r\n  |\u003e filter(fn: (r) =\u003e r[\"_field\"] == \"current\")\r\n  |\u003e filter(fn: (r) =\u003e r[\"storehouse_id\"] == \"${rack_id}\")\r\n  |\u003e filter(fn: (r) =\u003e ${qrcode})\r\n  |\u003e aggregateWindow(\r\n      every: v.windowPeriod,\r\n      fn: last,\r\n      createEmpty: false\r\n  )\r\n  |\u003e keep(columns: [\"_time\", \"_value\", \"qrcode\"])\r\n  |\u003e group(columns: [\"qrcode\"])",
+                                           "refId":  "A"
+                                       }
+                                   ],
+                       "title":  "Current",
+                       "transparent":  true,
+                       "type":  "timeseries"
+                   }
+               ],
+    "refresh":  "1s",
+    "schemaVersion":  39,
+    "tags":  [
+
+             ],
+    "templating":  {
+                       "list":  [
+                                    {
+                                        "allowCustomValue":  false,
+                                        "current":  {
+                                                        "selected":  false,
+                                                        "text":  "StoreHouseMeasData",
+                                                        "value":  "StoreHouseMeasData"
+                                                    },
+                                        "hide":  2,
+                                        "includeAll":  false,
+                                        "multi":  false,
+                                        "name":  "bucket",
+                                        "options":  [
+                                                        {
+                                                            "selected":  true,
+                                                            "text":  "StoreHouseMeasData",
+                                                            "value":  "StoreHouseMeasData"
+                                                        }
+                                                    ],
+                                        "query":  "StoreHouseMeasData",
+                                        "skipUrlSync":  false,
+                                        "type":  "custom"
+                                    },
+                                    {
+                                        "current":  {
+                                                        "selected":  false,
+                                                        "text":  "meas_data",
+                                                        "value":  "meas_data"
+                                                    },
+                                        "hide":  0,
+                                        "includeAll":  false,
+                                        "label":  "Measurement",
+                                        "multi":  false,
+                                        "name":  "meas",
+                                        "options":  [
+                                                        {
+                                                            "selected":  true,
+                                                            "text":  "meas_data",
+                                                            "value":  "meas_data"
+                                                        }
+                                                    ],
+                                        "query":  "meas_data",
+                                        "queryValue":  "",
+                                        "skipUrlSync":  false,
+                                        "type":  "custom"
+                                    },
+                                    {
+                                        "current":  {
+                                                        "selected":  false,
+                                                        "text":  "${VAR_RACK_ID}",
+                                                        "value":  "${VAR_RACK_ID}"
+                                                    },
+                                        "hide":  2,
+                                        "label":  "RackID",
+                                        "name":  "rack_id",
+                                        "options":  [
+                                                        {
+                                                            "selected":  false,
+                                                            "text":  "${VAR_RACK_ID}",
+                                                            "value":  "${VAR_RACK_ID}"
+                                                        }
+                                                    ],
+                                        "query":  "${VAR_RACK_ID}",
+                                        "skipUrlSync":  false,
+                                        "type":  "constant"
+                                    },
+                                    {
+                                        "allValue":  "",
+                                        "current":  {
+
+                                                    },
+                                        "datasource":  {
+                                                           "type":  "influxdb",
+                                                           "uid":  "${DS_INFLUXDB}"
+                                                       },
+                                        "definition":  "import \"influxdata/influxdb/schema\"\r\n\r\nschema.tagValues(\r\n  bucket: \"${bucket}\",\r\n  predicate: (r) =\u003e r._measurement == \"${meas}\" and r.storehouse_id == \"${rack_id}\" and r.serialboard_id == \"${serialboard_id}\",\r\n  tag: \"qrcode\"\r\n)\r\n|\u003e filter(fn: (r) =\u003e r._value != \"curr\")\r\n|\u003e map(fn: (r) =\u003e ({_value: r._value}))\r\n",
+                                        "hide":  0,
+                                        "includeAll":  true,
+                                        "label":  "QRcode",
+                                        "multi":  true,
+                                        "name":  "qrcode_list",
+                                        "options":  [
+
+                                                    ],
+                                        "query":  "import \"influxdata/influxdb/schema\"\r\n\r\nschema.tagValues(\r\n  bucket: \"${bucket}\",\r\n  predicate: (r) =\u003e r._measurement == \"${meas}\" and r.storehouse_id == \"${rack_id}\" and r.serialboard_id == \"${serialboard_id}\",\r\n  tag: \"qrcode\"\r\n)\r\n|\u003e filter(fn: (r) =\u003e r._value != \"curr\")\r\n|\u003e map(fn: (r) =\u003e ({_value: r._value}))\r\n",
+                                        "refresh":  2,
+                                        "regex":  "",
+                                        "skipUrlSync":  false,
+                                        "sort":  0,
+                                        "type":  "query"
+                                    },
+                                    {
+                                        "current":  {
+                                                        "selected":  false,
+                                                        "text":  "Left",
+                                                        "value":  "Left"
+                                                    },
+                                        "hide":  2,
+                                        "includeAll":  false,
+                                        "multi":  false,
+                                        "name":  "pallet",
+                                        "options":  [
+
+                                                    ],
+                                        "query":  "",
+                                        "skipUrlSync":  false,
+                                        "type":  "custom"
+                                    },
+                                    {
+                                        "current":  {
+
+                                                    },
+                                        "datasource":  {
+                                                           "type":  "mssql",
+                                                           "uid":  "${DS_MSSQL}"
+                                                       },
+                                        "definition":  "WITH raw AS (\n  SELECT \u0027${qrcode_list:csv}\u0027 AS expr\n),\nsplit_expr AS (\n  SELECT r.expr, LTRIM(RTRIM(s.value)) AS value\n  FROM raw r\n  CROSS APPLY STRING_SPLIT(r.expr, \u0027,\u0027) AS s\n)\nSELECT \n  CASE \n    WHEN MIN(LTRIM(RTRIM(expr))) IN (\u0027All\u0027) THEN \u0027true\u0027\n    ELSE STRING_AGG(\u0027r[\"qrcode\"] == \"\u0027 + value + \u0027\"\u0027, \u0027 or \u0027)\n  END AS result\nFROM split_expr;",
+                                        "hide":  2,
+                                        "includeAll":  false,
+                                        "multi":  false,
+                                        "name":  "qrcode",
+                                        "options":  [
+
+                                                    ],
+                                        "query":  "WITH raw AS (\n  SELECT \u0027${qrcode_list:csv}\u0027 AS expr\n),\nsplit_expr AS (\n  SELECT r.expr, LTRIM(RTRIM(s.value)) AS value\n  FROM raw r\n  CROSS APPLY STRING_SPLIT(r.expr, \u0027,\u0027) AS s\n)\nSELECT \n  CASE \n    WHEN MIN(LTRIM(RTRIM(expr))) IN (\u0027All\u0027) THEN \u0027true\u0027\n    ELSE STRING_AGG(\u0027r[\"qrcode\"] == \"\u0027 + value + \u0027\"\u0027, \u0027 or \u0027)\n  END AS result\nFROM split_expr;",
+                                        "refresh":  1,
+                                        "regex":  "",
+                                        "skipUrlSync":  false,
+                                        "sort":  0,
+                                        "type":  "query"
+                                    },
+                                    {
+                                        "current":  {
+                                                        "selected":  false,
+                                                        "text":  "A0001",
+                                                        "value":  "A0001"
+                                                    },
+                                        "hide":  2,
+                                        "includeAll":  false,
+                                        "multi":  false,
+                                        "name":  "serialboard_id",
+                                        "options":  [
+
+                                                    ],
+                                        "query":  "",
+                                        "queryValue":  "",
+                                        "skipUrlSync":  false,
+                                        "type":  "custom"
+                                    },
+                                    {
+                                        "current":  {
+                                                        "selected":  false,
+                                                        "text":  "Voltage",
+                                                        "value":  "voltage"
+                                                    },
+                                        "hide":  0,
+                                        "includeAll":  true,
+                                        "label":  "SelectExportData",
+                                        "multi":  true,
+                                        "name":  "select_export_data",
+                                        "options":  [
+                                                        {
+                                                            "selected":  false,
+                                                            "text":  "All",
+                                                            "value":  "$__all"
+                                                        },
+                                                        {
+                                                            "selected":  true,
+                                                            "text":  "Voltage",
+                                                            "value":  "voltage"
+                                                        },
+                                                        {
+                                                            "selected":  false,
+                                                            "text":  "Temperature",
+                                                            "value":  "temperature"
+                                                        },
+                                                        {
+                                                            "selected":  false,
+                                                            "text":  "Current",
+                                                            "value":  "current"
+                                                        }
+                                                    ],
+                                        "query":  "Voltage : voltage, Temperature : temperature, Current : current",
+                                        "queryValue":  "",
+                                        "skipUrlSync":  false,
+                                        "type":  "custom"
+                                    },
+                                    {
+                                        "current":  {
+
+                                                    },
+                                        "datasource":  {
+                                                           "type":  "mssql",
+                                                           "uid":  "${DS_MSSQL}"
+                                                       },
+                                        "definition":  "WITH raw AS (\n  SELECT \u0027${select_export_data:csv}\u0027 AS expr\n),\nsplit_expr AS (\n  SELECT r.expr, LTRIM(RTRIM(s.value)) AS value\n  FROM raw r\n  CROSS APPLY STRING_SPLIT(r.expr, \u0027,\u0027) AS s\n)\nSELECT \n  CASE \n    WHEN MIN(LTRIM(RTRIM(expr))) IN (\u0027All\u0027) THEN \u0027true\u0027\n    ELSE STRING_AGG(\u0027r[\"_field\"] == \"\u0027 + value + \u0027\"\u0027, \u0027 or \u0027)\n  END AS result\nFROM split_expr;",
+                                        "hide":  2,
+                                        "includeAll":  false,
+                                        "multi":  false,
+                                        "name":  "select_export_data_list",
+                                        "options":  [
+
+                                                    ],
+                                        "query":  "WITH raw AS (\n  SELECT \u0027${select_export_data:csv}\u0027 AS expr\n),\nsplit_expr AS (\n  SELECT r.expr, LTRIM(RTRIM(s.value)) AS value\n  FROM raw r\n  CROSS APPLY STRING_SPLIT(r.expr, \u0027,\u0027) AS s\n)\nSELECT \n  CASE \n    WHEN MIN(LTRIM(RTRIM(expr))) IN (\u0027All\u0027) THEN \u0027true\u0027\n    ELSE STRING_AGG(\u0027r[\"_field\"] == \"\u0027 + value + \u0027\"\u0027, \u0027 or \u0027)\n  END AS result\nFROM split_expr;",
+                                        "refresh":  2,
+                                        "regex":  "",
+                                        "skipUrlSync":  false,
+                                        "sort":  0,
+                                        "type":  "query"
+                                    },
+                                    {
+                                        "current":  {
+                                                        "selected":  false,
+                                                        "text":  "192.168.127.100",
+                                                        "value":  "192.168.127.100"
+                                                    },
+                                        "hide":  2,
+                                        "name":  "ip",
+                                        "options":  [
+
+                                                    ],
+                                        "query":  "192.168.127.100",
+                                        "skipUrlSync":  false,
+                                        "type":  "textbox"
+                                    }
+                                ]
+                   },
+    "time":  {
+                 "from":  "now-30m",
+                 "to":  "now"
+             },
+    "timepicker":  {
+                       "refresh_intervals":  [
+                                                 "1s",
+                                                 "3s",
+                                                 "5s",
+                                                 "20s",
+                                                 "10s",
+                                                 "30s",
+                                                 "1m",
+                                                 "5m",
+                                                 "15m",
+                                                 "30m",
+                                                 "1h",
+                                                 "2h",
+                                                 "1d"
+                                             ]
+                   },
+    "timezone":  "",
+    "title":  "RealTime Cell Data",
+    "uid":  "ceqs9fdv8ni80a",
+    "version":  6,
+    "weekStart":  "",
+    "__inputs":  [
+                     {
+                         "name":  "DS_INFLUXDB",
+                         "label":  "InfluxDB",
+                         "description":  "",
+                         "type":  "datasource",
+                         "pluginId":  "influxdb",
+                         "pluginName":  "InfluxDB"
+                     },
+                     {
+                         "name":  "DS_MSSQL",
+                         "label":  "MSSQL",
+                         "description":  "",
+                         "type":  "datasource",
+                         "pluginId":  "mssql",
+                         "pluginName":  "Microsoft SQL Server"
+                     }
+                 ]
+}

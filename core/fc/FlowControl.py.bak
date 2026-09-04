@@ -1,0 +1,507 @@
+import json
+from logging import root
+import os
+import sys
+import argparse
+from collections import deque
+import copy
+import pandas as pd
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import protocol.wifi.meas as meas
+import balps.mssql_mgr
+import balps.influxdb_mgr
+import balps.meas_map_mgr
+from balps.log_mgr import logging_api
+from datetime import datetime, timedelta
+import redis
+import xml.etree.ElementTree as ET  # noqa: S405
+import xml.dom.minidom as minidom  # noqa: F401, S408
+
+# User Define Code
+import socket
+import os
+import sys
+import time
+
+"""
+Flow Control
+  Collect Data > Algorithm Execution or Device Sensing  > Write Data
+"""
+
+# UpData = []
+
+
+class FC_api:
+    def __init__(self, args):
+        """
+        Initialize db connection and flow control setting
+
+        Args:
+            args: Receive input parameter settings
+
+        Returns:
+            None
+
+        Example:
+            >>> fc_obj = FC_api()
+        """
+        try:
+            self.logger = logging_api(filename=os.path.join("logs", f"{os.path.splitext(os.path.basename(sys.argv[0]))[0]}"), backup_count=7)
+            self.logging = self.logger.get_logger()  # Create influxdb and mssql object
+            self.sbid = args.serialboard_id
+            self.shid = args.storehouse_id
+            self.pbid = args.protectboard_id
+            self.ip = args.ser_ip
+            self.port = args.eport
+            self.meas_instance = 0
+            self.meas_data_pd = []
+            self.meas_map = None
+            self.alg_executor = None
+            self.is_first_round = True
+            self.skip_w2002_reply = False
+            self.skip_w2003_reply = False
+            self.skip_w2003_step = None
+            # Load Input Config
+            with open(args.config) as json_file:
+                self.config_data = json.load(json_file)
+
+            self.mssql_obj = balps.mssql_mgr.mssql_api()
+            self.influxdb_obj = balps.influxdb_mgr.influxdb_api()
+            self.meas_map_obj = balps.meas_map_mgr.meas_map_api(
+                self.influxdb_obj,
+                self.config_data["meas"][0]["protect_params"],
+            )
+
+            self.conn_obj = 0
+            self.addr = 0
+            # Internal message exchange from message manager to flow control
+            self.redis_obj = redis.StrictRedis(host="127.0.0.1", port=6379, db=0)
+            self.mode = "Normal"
+            self.pallet_status = 1
+            self.alarm_sender = False
+            self.heartbeat_last = time.time()
+            self.heartbeat_current = time.time()
+            self.mpd_heartbeat_timeout = self.config_data["meas"][0]["variable"]["mpd_heartbeat_timeout"]
+            self.standby_heartbeat_timeout = self.config_data["meas"][0]["variable"]["standby_heartbeat_timeout"]
+            self.esp_connected = 0
+            self.last_time = time.time()
+            self.pending_ack_queue = deque()
+            self.message_mapping = {
+                "StoreHouseStatusRequest": "W2002",
+                "StoreHouseStepCheckRequest": "W2003",
+            }
+            self.last_meas_write_time = time.time()
+            self.meas_write_interval = 5.0
+        except Exception:
+            self.logging.error(f"Flow control initialization failed\n{self.logger.get_slim_error_log()}")
+
+    def get_logger(self):
+        return self.logger
+
+    def get_logging(self):
+        return self.logging
+
+    def create_db_conn(self):
+        """
+        Create db connection (influx db and mssql)
+
+        Args:
+            None
+
+        Returns:
+            None
+
+        Example:
+            >>> fc_obj = FC_api()
+            >>> fc_obj.create_db_conn()
+        """
+        try:
+            self.mssql_obj.create_db_connect_pd()
+            self.influxdb_obj.create_connect()
+        except Exception:
+            self.logging.error(f"create_db_conn failed\n{self.logger.get_slim_error_log()}")
+
+    def close_db_conn(self):
+        """
+        Close db connection (influx db and mssql)
+
+        Args:
+            None
+
+        Returns:
+            None
+
+        Example:
+            >>> fc_obj = FC_api()
+            >>> fc_obj.close_db_conn()
+        """
+        try:
+            self.mssql_obj.close_db_connect_pd()
+            self.influxdb_obj.close_connect()
+        except Exception:
+            self.logging.error(f"close_db_conn failed\n{self.logger.get_slim_error_log()}")
+
+    def process_xml_request(self):
+        """
+        Parse xml request
+        - Measurement map table
+        - Config map table
+
+        Args:
+            None
+        Returns:
+            None
+
+        Example:
+            >>> fc_obj = FC_api()
+            >>> fc_obj.process_xml_request()
+        """
+        try:
+            # Get the xml data from the redis queue
+            data = self.redis_obj.lpop(self.sbid)
+            if data:
+                xml_string = data.decode("utf-8")
+                root = ET.fromstring(xml_string)  # noqa: S314
+                # Process w2002 message
+                if root.find("./HEADER/MESSAGENAME").text == "StoreHouseStatusRequest":
+                    # try:
+                    # Update the device information
+                    device_info = self.meas_map_obj.parse_pallet_info(xml_string)
+                    self.meas_map_obj.delete_storehouse_entry(self.shid)
+                    self.meas_map_obj.add_storehouse_entry(self.shid, device_info)
+                    # Update the configuration information
+                    self.config_info = self.meas_map_obj.parse_config_info(xml_string)
+                    self.meas_map_obj.delete_config_entry(self.sbid)
+                    self.meas_map_obj.add_config_entry(self.sbid, self.config_info)
+                    # Set operation mode
+                    self.alg_executor.set_configuration(self.meas_map_obj, "Config")
+                    # Update the task information
+                    self.meas_map_obj.update_task_info(xml_string)
+                    # Save the request context before the cache is changed by next request.
+                    response_data = copy.deepcopy(self.meas_map_obj.get_task_info())
+                    self.pending_ack_queue.append(
+                        {
+                            "message_name": "StoreHouseStatusRequest",
+                            "step": None,
+                            "response_data": response_data,
+                            "skip_reply": self.skip_w2002_reply,
+                        }
+                    )
+                    self.influxdb_obj.write_log_influxdb("DEBUG", f"[CCMS2Task] [W2002] [{self.sbid}] [{self.pbid}]", self.sbid)
+                    self.logging.debug(f"[CCMS2Task] [W2002] [{self.sbid}] [{self.pbid}]")
+                    # except ValueError as e:
+                    #     pass
+                if root.find("./HEADER/MESSAGENAME").text == "StoreHouseStepCheckRequest":
+                    # Update the task information
+                    self.meas_map_obj.update_task_info(xml_string)
+                    # Set operation mode
+                    self.alg_executor.set_configuration(self.meas_map_obj, "Check")
+                    step = int(root.find("./BODY/STEP").text)
+                    # Save the request context before the cache is changed.
+                    response_data = copy.deepcopy(
+                        self.meas_map_obj.get_task_info()
+                    )
+                    # if step == int(response_data['StopStep']['0']):
+                    #     self.redis_obj.rpush(
+                    #         "ACK",
+                    #         json.dumps(response_data).encode("utf-8"),
+                    #     )
+                    #     return
+                    self.pending_ack_queue.append(
+                        {
+                            "message_name": "StoreHouseStepCheckRequest",
+                            "step": step,
+                            "response_data": response_data,
+                            "skip_reply": (
+                                self.skip_w2003_reply
+                                and step == self.skip_w2003_step
+                            ),
+                        }
+                    )
+                    self.influxdb_obj.write_log_influxdb("DEBUG", f"[CCMS2Task] [W2003-{root.find("./BODY/STEP").text}] [{self.sbid}] [{self.pbid}]", self.sbid)
+                    self.logging.debug(f"[CCMS2Task] [W2003-{root.find("./BODY/STEP").text}] [{self.sbid}] [{self.pbid}]")
+                if root.find("./HEADER/MESSAGENAME").text == "Disconnect":
+                    self.conn_obj.close()
+
+        except Exception:
+            self.influxdb_obj.write_log_influxdb("ERROR", f"process_xml_request failed [{self.sbid}]\n{self.logger.get_slim_error_log()}", self.sbid)
+
+    def esp_heartbeat_check(self):
+        self.heartbeat_current = time.time()
+        heartbeat_timeout = self.standby_heartbeat_timeout
+        if not self.is_first_round:
+            heartbeat_timeout = self.mpd_heartbeat_timeout
+        if self.heartbeat_current - self.heartbeat_last >= heartbeat_timeout:
+            self.influxdb_obj.write_log_influxdb("ERROR", f"CCMS2MPD heartbeat timeout [Waiting for MPD Device Connection] [{self.sbid}] [{self.port}] [{self.heartbeat_current - self.heartbeat_last}]", self.sbid)
+            self.logging.error(f"CCMS2MPD heartbeat timeout [Waiting for MPD Device Connection] [{self.sbid}] [{self.port}] [{self.heartbeat_current - self.heartbeat_last}]")
+            self.mssql_obj.clear_task_table(is_all_clear=False, sb_id=self.sbid)
+
+    def init_algorithm(self, meas_id):
+        """
+        Initilze measurement method
+
+        Args:
+            meas_id: Measurement table index (first meas is 0 for FlowControl.json)
+        Returns:
+            None
+
+        Example:
+            >>> fc_obj = FC_api()
+            >>> fc_obj.init_algorithm(meas_id)
+        """
+        try:
+            self.heartbeat_last = time.time()
+            # Create the socket to receive data from Mesaurement Device
+            self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+            self.server_socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPIDLE, 30)
+            self.server_socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPINTVL, 10)
+            self.server_socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPCNT, 3)
+            self.server_socket.bind((self.ip, self.port))
+            self.server_socket.listen()
+            self.logging.debug(f"FC Task Listening on {self.ip}:{self.port} [{self.sbid}]")
+            self.influxdb_obj.write_log_influxdb("INFO", f"FC Task Listening on {self.ip}:{self.port} [{self.sbid}]", self.sbid)
+            self.server_socket.settimeout(3.0)
+            while True:
+                try:
+                    self.conn_obj, self.addr = self.server_socket.accept()
+                    self.logging.debug(f"ESP Device Connected ({self.ip}:{self.port}) [{self.sbid}]")
+                    self.influxdb_obj.write_log_influxdb("INFO", f"ESP Device Connected ({self.ip}:{self.port}) [{self.sbid}]", self.sbid)
+                    if not self.is_first_round:
+                        query = f"""
+                            SELECT pallet_info, step_info, task_step
+                            FROM BALPS.dbo.Task
+                            WHERE task_name = '{self.sbid}'
+                            AND is_delete = 0
+                        """
+                        result_df = self.mssql_obj.query_db_pd(query)
+
+                        if not result_df.empty:
+                            pallet_info = result_df.iloc[0]["pallet_info"]
+                            step_info = result_df.iloc[0]["step_info"]
+                            task_step = result_df.iloc[0]["task_step"]
+
+                            if pd.notna(pallet_info) and str(pallet_info).strip():
+                                self.skip_w2002_reply = True
+                                self.redis_obj.rpush(
+                                    self.sbid,
+                                    str(pallet_info),
+                                )
+                                self.logging.debug(f"FC Task State Recovery [W2002] [{self.sbid}]")
+                                self.influxdb_obj.write_log_influxdb("INFO", f"FC Task State Recovery [W2002] [{self.sbid}]", self.sbid)
+
+                            if pd.notna(step_info) and str(step_info).strip():
+                                self.skip_w2003_reply = True
+                                self.skip_w2003_step = int(task_step)
+
+                                self.redis_obj.rpush(
+                                    self.sbid,
+                                    str(step_info),
+                                )
+                                self.logging.debug(f"FC Task State Recovery [W2003-{task_step}] [{self.sbid}]")
+                                self.influxdb_obj.write_log_influxdb("INFO", f"FC Task State Recovery [W2003-{task_step}] [{self.sbid}]", self.sbid)
+
+                    self.is_first_round=False
+                    self.influxdb_obj.write_log_influxdb("INFO", f"Connection ESP Device Ready [{self.sbid}]", self.sbid)
+                    if self.alg_executor is None:
+                        self.alg_executor = meas.meas_api(
+                            self.config_data["meas"][meas_id]["variable"], self.config_data["meas"][meas_id]["db_out"], self.influxdb_obj, self.mssql_obj, self.sbid, self.shid
+                        )
+                    self.alg_executor.set_heartbeat_timeout()
+                    break
+                except TimeoutError:
+                    pass
+                self.esp_heartbeat_check()
+        except Exception:
+            self.influxdb_obj.write_log_influxdb("ERROR", f"init_algorithm failed [{self.sbid}]\n{self.logger.get_slim_error_log()}", self.sbid)
+
+    def run_algorithm(self):
+        """
+        Run measurement method
+
+        Args:
+            None
+        Returns:
+            None
+
+        Example:
+            >>> fc_obj = FC_api()
+            >>> fc_obj.run_algorithm()
+        """
+        try:
+            # Process the measurement method
+            res_result, self.meas_out_pd = self.alg_executor.run_meas(self.conn_obj)
+            if res_result:
+                self.influxdb_obj.write_json_influxdb("INFO", "[RspCCS]\n" + self.influxdb_obj.reformat_json_horizontal(res_result), "request", self.sbid, "RspCCS")
+                pd_id = res_result.get("ProtectBoardID", {}).get("0")
+                if pd_id is not None:  # and pd_id != "":
+                    self.meas_map_obj.update_task_info_pbid(pd_id)
+                # self.influxdb_obj.write_json_influxdb("INFO", "Rsp: " + json.dumps(res_result, indent=4), "request", self.sbid)
+            if self.meas_out_pd is not None and not self.meas_out_pd.empty:
+                self.influxdb_obj.write_json_influxdb("INFO", "[WrDB]\n" + self.influxdb_obj.format_df_mixed(self.meas_out_pd), "db", self.sbid, "WrDB")
+                # self.influxdb_obj.write_json_influxdb("INFO", "WriteDB: " + json.dumps(self.meas_out_pd.astype(str).to_dict(orient='records'), indent=4, ensure_ascii=False), "db", self.sbid)
+
+            if res_result:  # and self.alarm_sender == False:
+                # Get current task information
+                response_data = self.meas_map_obj.get_task_info()
+                response_data["ReturnCode"] = "0" if not res_result.get("ReturnCode", {}) else res_result.get("ReturnCode")
+                response_data["PalletID"] = res_result.get("PalletID", {}) if res_result.get("PalletID", {}).get("0") else response_data.get("PalletID")
+                if res_result.get("DataType", {}).get("0") == "ALARM":
+                    # Setup the response data
+                    response_data["MessageName"]["0"] = "AlarmStopReport"
+                    # Grafana UI show red
+                    self.pallet_status = 2
+                    self.alarm_sender = True
+                    response_data["Position"] = res_result.get("Position", {}) if res_result.get("Position", {}).get("0") else response_data.get("Position")
+                    response_data["QRCodeID"] = res_result.get("QRCodeID", {}) if res_result.get("QRCodeID", {}).get("0") else response_data.get("QRCodeID")
+                    self.redis_obj.rpush("ACK", json.dumps(response_data).encode("utf-8"))
+                elif res_result.get("DataType", {}).get("0") == "ACK":
+                    if not self.pending_ack_queue:
+                        return
+                    pending = self.pending_ack_queue.popleft()
+                    response_data = pending["response_data"]
+                    message_name = pending["message_name"]
+                    response_step = pending["step"]
+                    should_skip = pending["skip_reply"]
+
+                    # Update return code from actual device ACK.
+                    response_data["ReturnCode"] = (
+                        "0"
+                        if not res_result.get("ReturnCode", {})
+                        else res_result.get("ReturnCode")
+                    )
+
+                    response_data["PalletID"] = (
+                        res_result.get("PalletID", {})
+                        if res_result.get("PalletID", {}).get("0")
+                        else response_data.get("PalletID")
+                    )
+
+                    if should_skip:
+                        self.logging.debug(
+                            f"Skip recovery ACK "
+                            f"[{self.message_mapping.get(message_name, message_name)}] "
+                            f"[Step={response_step}] "
+                            f"[{self.sbid}]"
+                        )
+
+                        if message_name == "StoreHouseStatusRequest":
+                            self.skip_w2002_reply = False
+
+                        elif message_name == "StoreHouseStepCheckRequest":
+                            self.skip_w2003_reply = False
+                            self.skip_w2003_step = None
+
+                    else:
+                        self.redis_obj.rpush(
+                            "ACK",
+                            json.dumps(response_data).encode("utf-8"),
+                        )
+                elif res_result.get("DataType", {}).get("0") == "DATA":
+                    response_data["MessageName"]["0"] = "ESPRequest"
+                    self.redis_obj.rpush("ACK", json.dumps(response_data).encode("utf-8"))
+                # Send the response data to the redis queue
+                # self.logging.debug(f"[RspCCS]\n" + self.influxdb_obj.reformat_json_horizontal(response_data))
+        except Exception:
+            self.influxdb_obj.write_log_influxdb("ERROR", f"run_algorithm failed [{self.sbid}]\n{self.logger.get_slim_error_log()}", self.sbid)
+            raise
+
+    def write_data(self, meas_id):
+        """
+        Write measurement to db
+
+        Args:
+            meas_id: Measurement table index (first meas is 0 for FlowControl.json)
+
+        Returns:
+            None
+
+        Example:
+            >>> fc_obj = FC_api()
+            >>> fc_obj.write_data(meas_id)
+        """
+        try:
+            if self.meas_out_pd is None:
+                return
+            
+            current_time = time.time()
+            if current_time - self.last_meas_write_time < self.meas_write_interval:
+                return
+
+            # Write the measurement data to influxdb
+            for _ in range(len(self.config_data["meas"][meas_id]["db_out"])):
+                self.influxdb_obj.write_pd_influxdb(self.meas_out_pd, "meas_data", ["storehouse_id", "pallet_position", "serialboard_id", "protectboard_id", "position_id", "qrcode", "return_code"])
+            
+            self.last_meas_write_time = time.time()
+        except Exception:
+            self.influxdb_obj.write_log_influxdb("ERROR", f"write_data failed [{self.sbid}]\n{self.logger.get_slim_error_log()}", self.sbid)
+
+    def update_pallet_status(self):
+        """
+        Update Pallet Status
+
+        Args:
+            None
+
+        Returns:
+            None
+
+        Example:
+            >>> fc_obj = FC_api()
+            >>> fc_obj.update_pallet_status()
+        """
+        try:
+            # Update the pallet status
+            self.mssql_obj.update_pallet_status(self.mssql_obj, self.sbid, self.pallet_status)
+        except Exception:
+            self.influxdb_obj.write_log_influxdb("ERROR", f"update_pallet_status failed [{self.sbid}]\n{self.logger.get_slim_error_log()}", self.sbid)
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Flow control.", usage="FlowControl.py -cfg <config> -tid <task_id> -ep <eport> -sip <ser_ip>")
+
+    # Input Argument Setting
+    parser.add_argument("-cfg", "--config", required=True, help="FC configuration e.g. config.json")
+    parser.add_argument("-shid", "--storehouse_id", type=int, required=True, help="task id e.g. 1")
+    parser.add_argument("-sbid", "--serialboard_id", type=str, required=True, help="task id e.g. 1")
+    parser.add_argument("-pbid", "--protectboard_id", type=str, required=True, help="task id e.g. 1")
+    parser.add_argument("-ep", "--eport", type=int, required=True, help="ESP Recv port e.g. 20001")
+    parser.add_argument("-sip", "--ser_ip", type=str, required=True, help="Server Recv IP e.g. 15.1.1.10")
+    try:
+        # Parse input parameters
+        args = parser.parse_args()
+        # Flow control initialization
+        obj_exec = FC_api(args)
+        logger = obj_exec.get_logger()
+        logging = obj_exec.get_logging()
+        obj_exec.create_db_conn()
+        last_pallet_update_time = datetime.now()
+        
+        while True:
+            # initialize the algorithm for measurement method
+            obj_exec.init_algorithm(0)
+            try:
+                while True:
+                    # Get the xml request
+                    obj_exec.process_xml_request()
+                    # Run the measurement method
+                    obj_exec.run_algorithm()
+                    # Write the measurement data to db
+                    obj_exec.write_data(0)
+
+                    # Update the pallet status
+                    if datetime.now() - last_pallet_update_time >= timedelta(seconds=3):
+                        obj_exec.update_pallet_status()
+                        last_pallet_update_time = datetime.now()
+            except Exception:
+                logging.error(f"Main function failed\n{logger.get_slim_error_log()}")
+                time.sleep(5)
+                pass
+
+    except Exception:
+        logging.error(f"Main function failed\n{logger.get_slim_error_log()}")
+        sys.exit(1)
+    except SystemExit:
+        parser.print_help()

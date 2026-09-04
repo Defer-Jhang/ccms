@@ -1,0 +1,3 @@
+﻿datetime,app_name,app_uuid,launch_command,last_exec_time,pid,active,is_delete
+2024-10-22 18:10:51.0000000,ccms,pLNIPz8VDgY9HKhv,python core\\main\\ccms.py,,,0,0
+2026-07-22 12:40:00.0000000,ccs,jQ8KFxw1P2bM5vZn,python core\\simulation\\XMLServer_dev.py,,,0,1

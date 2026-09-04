@@ -1,0 +1,82 @@
+{
+    "meas": [
+        {
+            "protect_params": {
+                "Step": "",
+                "Control_Mode": "",
+                "Cell_Max_Voltage": 1000,
+                "Cell_Min_Voltage": 1000,
+                "Cell_Delta_Voltage": 1,
+                "Cell_Delta_Voltage_Time": 1000,
+                "Cell_Max_Current": 1000,
+                "Cell_Min_Current": 1000,
+                "Cell_Protect_Temp": 10,
+                "Cell_Delta_Temp": 10,
+                "Cell_Delta_Temp_Time": 1000,
+                "Cell_Delta_Wire_Voltage": 1,
+                "Cell_Delta_Wire_Voltage_Time": 1000,
+                "Cell_Protect_Delay_Time": 1000,
+                "Cell_Setting_Time": 60000,
+                "Wire_Max_Voltage": 1000,
+                "Cell_Delta_Wire_Delay": 1000,
+                "Cell_Delta_Temp_Delay": 1000,
+                "Cell_Protect_Temp_Water": 10,
+                "Cell_Delta_Temp_Frame": 10
+            },
+            "variable": {
+                "mpd_heartbeat_timeout": 60,
+                "standby_heartbeat_timeout": 7200
+            },
+            "db_out": [
+                {
+                    "table": [
+                        "StoreHouseCellMeas"
+                    ],
+                    "field": [
+                        "datetime",
+                        "storehouse_id",
+                        "pallet_position",
+                        "serialboard_id",
+                        "position_id",
+                        "qrcode",
+                        "return_code",
+                        "voltage",
+                        "temperature",
+                        "current",
+                        "error_code",
+                        "protectboard_id",
+                        "wire_voltage_status",
+                        "fetstate",
+                        "fuse",
+                        "afe",
+                        "wifistdisconn",
+                        "wifiltdisconn",
+                        "socketstdisconn",
+                        "socketltdisconn",
+                        "heartbeattxcount",
+                        "heartbeatlosscount",
+                        "heartbeatlastrttms",
+                        "heartbeattrttmaxms",
+                        "heatbeattimeoutflag",
+                        "wifireconnlastms",
+                        "wifireconnavgms",
+                        "wifireconntimes",
+                        "socketreconnlastms",
+                        "socketreconnavgms",
+                        "socketreconnmaxms",
+                        "socketreconntimes",
+                        "error_code_curr",
+                        "wire_voltage_1",
+                        "wire_voltage_2",
+                        "wire_voltage_3",
+                        "wire_voltage_4",
+                        "wire_voltage_5",
+                        "error_value",
+                        "error_value_curr",
+                        "status"
+                    ]
+                }
+            ]
+        }
+    ]
+}
