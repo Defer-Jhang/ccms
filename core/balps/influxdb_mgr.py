@@ -1,7 +1,7 @@
 import pandas as pd
 
 from influxdb_client import InfluxDBClient, Point, WritePrecision
-from influxdb_client.client.write_api import ASYNCHRONOUS
+from influxdb_client.client.write_api import ASYNCHRONOUS, SYNCHRONOUS
 from datetime import datetime
 import pytz
 from functools import partial
@@ -63,6 +63,7 @@ class influxdb_api:
                 return True
         except Exception:
             self.logging.error(f"health_check failed\n{self.logger.get_slim_error_log()}")
+            self.write_log_influxdb("ERROR", f"health_check failed\n{self.logger.get_slim_error_log()}", "system")
             return False
 
     def create_connect(self):
@@ -83,11 +84,12 @@ class influxdb_api:
             # Create influx db connection
             self.influx_client = InfluxDBClient(url=self.url, token=self.token, org=self.org, timeout=600000)
             # Create query and write api for influx db
-            self.write_api = self.influx_client.write_api(write_options=ASYNCHRONOUS)
+            self.write_api = self.influx_client.write_api(write_options=SYNCHRONOUS)
             self.query_api = self.influx_client.query_api()
             self.create_bucket(self.bucket)
         except Exception as e:
             self.logging.error(f"create_connect failed\n{self.logger.get_slim_error_log()}")
+            self.write_log_influxdb("ERROR", f"create_connect failed\n{self.logger.get_slim_error_log()}", "system")
             raise e
 
     def close_connect(self):
@@ -109,6 +111,7 @@ class influxdb_api:
             self.influx_client.close()
         except Exception:
             self.logging.error(f"close_connect failed\n{self.logger.get_slim_error_log()}")
+            self.write_log_influxdb("ERROR", f"close_connect failed\n{self.logger.get_slim_error_log()}", "system")
 
     def delete_bucket(self, bucket_name):
         """
@@ -135,6 +138,7 @@ class influxdb_api:
 
         except Exception:
             self.logging.error(f"delete_bucket failed\n{self.logger.get_slim_error_log()}")
+            self.write_log_influxdb("ERROR", f"delete_bucket failed\n{self.logger.get_slim_error_log()}", "system")
 
     def create_bucket(self, bucket_name):
         """
@@ -160,6 +164,7 @@ class influxdb_api:
 
         except Exception as e:
             self.logging.error(f"create_bucket failed\n{self.logger.get_slim_error_log()}")
+            self.write_log_influxdb("ERROR", f"create_bucket failed\n{self.logger.get_slim_error_log()}", "system")
             raise e
 
     def write_pd_influxdb_many_record(self, df, meas, tags):
@@ -194,6 +199,7 @@ class influxdb_api:
             self.write_api.write(self.bucket, record=points)
         except Exception:
             self.logging.error(f"write_pd_influxdb_many_record failed\n{self.logger.get_slim_error_log()}")
+            self.write_log_influxdb("ERROR", f"write_pd_influxdb_many_record failed\n{self.logger.get_slim_error_log()}", "system")
 
     def dataframe_to_point(self, tz="Asia/Taipei"):
         """
@@ -228,6 +234,7 @@ class influxdb_api:
             return points
         except Exception:
             self.logging.error(f"dataframe_to_point failed\n{self.logger.get_slim_error_log()}")
+            self.write_log_influxdb("ERROR", f"dataframe_to_point failed\n{self.logger.get_slim_error_log()}", "system")
 
     def write_pd_influxdb(self, df, meas, tags):
         """
@@ -256,6 +263,7 @@ class influxdb_api:
             self.write_api.write(self.bucket, record=point)
         except Exception:
             self.logging.error(f"write_pd_influxdb failed\n{self.logger.get_slim_error_log()}")
+            self.write_log_influxdb("ERROR", f"write_pd_influxdb failed\n{self.logger.get_slim_error_log()}", "system")
 
     def reformat_json_horizontal(self, data, exclude_keys=None):
         result_lines = []
@@ -309,6 +317,7 @@ class influxdb_api:
             self.write_api.write(self.bucket, record=point)
         except Exception:
             self.logging.error(f"write_perf_influxdb failed\n{self.logger.get_slim_error_log()}")
+            self.write_log_influxdb("ERROR", f"write_perf_influxdb failed\n{self.logger.get_slim_error_log()}", "system")
 
     def write_log_influxdb(self, level, message, sbid="A0001"):
         """
@@ -332,6 +341,8 @@ class influxdb_api:
             self.write_api.write(self.bucket, record=point)
         except Exception:
             self.logging.error(f"write_log_influxdb failed\n{self.logger.get_slim_error_log()}")
+            # This method is the terminal error-log sink; calling itself here
+            # would recurse indefinitely when InfluxDB is unavailable.
 
     def write_ccs_logs_influxdb(self, level, message, sbid="A0001"):
             """
@@ -355,6 +366,7 @@ class influxdb_api:
                 self.write_api.write(self.bucket, record=point)
             except Exception:
                 self.logging.error(f"write_ccs_logs_influxdb failed\n{self.logger.get_slim_error_log()}")
+                self.write_log_influxdb("ERROR", f"write_ccs_logs_influxdb failed\n{self.logger.get_slim_error_log()}", "system")
 
     def write_msg_influxdb(self, level, message, sbid="A0001", storehouse_id="0"):
         """
@@ -378,6 +390,7 @@ class influxdb_api:
             self.write_api.write(self.bucket, record=point)
         except Exception:
             self.logging.error(f"write_msg_influxdb failed\n{self.logger.get_slim_error_log()}")
+            self.write_log_influxdb("ERROR", f"write_msg_influxdb failed\n{self.logger.get_slim_error_log()}", "system")
 
     def write_json_influxdb(self, level, message, type="request", sbid="ALL", req_name="ALL"):
         """
@@ -402,7 +415,8 @@ class influxdb_api:
             )
             self.write_api.write(self.bucket, record=point)
         except Exception:
-            self.logging.error(f"write_msg_influxdb failed\n{self.logger.get_slim_error_log()}")
+            self.logging.error(f"write_json_influxdb failed\n{self.logger.get_slim_error_log()}")
+            self.write_log_influxdb("ERROR", f"write_json_influxdb failed\n{self.logger.get_slim_error_log()}", "system")
 
     def read_pd_influxdb(self, start_time, end_time, bucket, meas, fields):
         """
@@ -446,3 +460,5 @@ class influxdb_api:
             return self.query_api.query_data_frame(query=query, org=self.org)
         except Exception:
             self.logging.error(f"read_pd_influxdb failed\n{self.logger.get_slim_error_log()}")
+            self.write_log_influxdb("ERROR", f"read_pd_influxdb failed\n{self.logger.get_slim_error_log()}", "system")
+

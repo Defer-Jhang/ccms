@@ -52,6 +52,19 @@
             ],
             "cwd": "${workspaceFolder}",
             "justMyCode": true
+        },
+        {
+            "name": "Debug E2E CCMS Flow",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "unittest",
+            "args": [
+                "tests.test_e2e_ccms_flow",
+                "-v"
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": true
         }
     ]
 }
