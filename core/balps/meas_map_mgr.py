@@ -387,13 +387,44 @@ class meas_map_api:
             }
 
             # ---------------------------------------------------------
-            # 1. Get XML keys with original case.
+            # 1. Get XML keys with original case and reject duplicates.
             # ---------------------------------------------------------
-            xml_keys = {
-                element.tag
+            xml_elements = [
+                element
                 for element in recipe_step
                 if element.tag not in excluded_xml_keys
-            }
+            ]
+            xml_key_list = [element.tag for element in xml_elements]
+            duplicate_xml_keys = sorted({
+                key
+                for key in xml_key_list
+                if xml_key_list.count(key) > 1
+            })
+
+            if duplicate_xml_keys:
+                duplicate_messages = []
+                for key in duplicate_xml_keys:
+                    values = [
+                        (element.text or "").strip()
+                        for element in xml_elements
+                        if element.tag == key
+                    ]
+                    if len(set(values)) == 1:
+                        duplicate_messages.append(
+                            f"{key} repeated {len(values)} times with same value "
+                            f"[{values[0]}]"
+                        )
+                    else:
+                        duplicate_messages.append(
+                            f"{key} repeated with different values {values}"
+                        )
+
+                raise KeyError(
+                    "Duplicate XML protect parameter key | "
+                    + " | ".join(duplicate_messages)
+                )
+
+            xml_keys = set(xml_key_list)
 
             # ---------------------------------------------------------
             # 2. Get protect parameter keys with original case.

@@ -238,7 +238,7 @@ class ESP_simulation:
                             "ProtectBoardID": {"0": f"{self.active_protect_board_list[port]}"},
                             "TimerT1s": {"0": T1Timer_s},
                             "TimerT1ms": {"0": T1Timer_ms},
-                            "Status": {"0": 0},
+                            "Status": {"0": 134184960},
                             "Position": {
                                 "0": 1,
                                 "1": 2,
@@ -256,6 +256,15 @@ class ESP_simulation:
                                 "4": "OTS",
                                 "5": "OTW",
                                 "6": "OC"
+                            },
+                            "ErrorValue": {
+                                "0": "4210",
+                                "1": "0",
+                                "2": "412",
+                                "3": "462",
+                                "4": "62",
+                                "5": "912",
+                                "6": "2620"
                             },
                             "Volt": {
                                 "0": int(round(random.uniform(4.18, 4.2), 2) * 1000),
@@ -313,7 +322,7 @@ class ESP_simulation:
                             "ProtectBoardID": {"0": f"{self.active_protect_board_list[port]}"},
                             "TimerT1s": {"0": T1Timer_s},
                             "TimerT1ms": {"0": T1Timer_ms},
-                            "Status": {"0": 0},
+                            "Status": {"0": 134152192},
                             "Position": {
                                 "0": 1,
                                 "1": 2,
@@ -329,6 +338,14 @@ class ESP_simulation:
                                 "3": "OWVS",
                                 "4": "OTF",
                                 "5": "OC"
+                            },
+                            "ErrorValue": {
+                                "0": "1505",
+                                "1": "1510",
+                                "2": "1515",
+                                "3": "1520",
+                                "4": "50",
+                                "5": "2620"
                             },
                             "Volt": {
                                 "0": int(self.voltage[port] * 1000),
@@ -386,7 +403,7 @@ class ESP_simulation:
                             "ProtectBoardID": {"0": f"{self.active_protect_board_list[port]}"},
                             "TimerT1s": {"0": T1Timer_s},
                             "TimerT1ms": {"0": T1Timer_ms},
-                            "Status": {"0": 0},
+                            "Status": {"0": 134119424},
                             "Position": {
                                 "0": 1,
                                 "1": 2,
@@ -406,13 +423,13 @@ class ESP_simulation:
                                 "6": "UC"
                             },
                             "ErrorValue": {
-                                "0": "61",
-                                "1": "61",
-                                "2": "61",
-                                "3": "61",
-                                "4": "61",
-                                "5": "61",
-                                "6": "21"
+                                "0": "11400000",
+                                "1": "11400000",
+                                "2": "11400000",
+                                "3": "11400000",
+                                "4": "11400000",
+                                "5": "11400000",
+                                "6": "-1550"
                             },
                             "Volt": {
                                 "0": int(self.voltage[port] * 1000),
@@ -470,7 +487,7 @@ class ESP_simulation:
                             "ProtectBoardID": {"0": f"{self.active_protect_board_list[port]}"},
                             "TimerT1s": {"0": T1Timer_s},
                             "TimerT1ms": {"0": T1Timer_ms},
-                            "Status": {"0": 0},
+                            "Status": {"0": 134053888},
                             "Position": {
                                 "0": 1,
                                 "1": 2,
@@ -490,13 +507,13 @@ class ESP_simulation:
                                 "6": "UC"
                             },
                             "ErrorValue": {
-                                "0": "61",
-                                "1": "61",
-                                "2": "61",
-                                "3": "61",
-                                "4": "61",
-                                "5": "61",
-                                "6": "21"
+                                "0": "11400000",
+                                "1": "11400000",
+                                "2": "11400000",
+                                "3": "11400000",
+                                "4": "11400000",
+                                "5": "11400000",
+                                "6": "-1550"
                             },
                             "Volt": {
                                 "0": int(self.voltage[port] * 1000),
@@ -561,7 +578,7 @@ class ESP_simulation:
                             "ProtectBoardID": {"0": f"{self.active_protect_board_list[port]}"},
                             "TimerT1s": {"0": T1Timer_s},
                             "TimerT1ms": {"0": T1Timer_ms},
-                            "Status": {"0": 264175616},
+                            "Status": {"0": 134184960},
                             "Volt": {
                                 "0": int(self.voltage[port] * 1000 * random.uniform(1.00400, 1.00700)),
                                 "1": int(self.voltage[port] * 1000 * random.uniform(1.00400, 1.00700)),
@@ -626,7 +643,7 @@ class ESP_simulation:
                             "ProtectBoardID": {"0": f"{self.active_protect_board_list[port]}"},
                             "TimerT1s": {"0": T1Timer_s},
                             "TimerT1ms": {"0": T1Timer_ms},
-                            "Status": {"0": 1},
+                            "Status": {"0": 134184960},
                             "Volt": {
                                 "0": int(self.voltage[port] * 1000),
                                 "1": int(self.voltage[port] * 1000),
@@ -692,7 +709,7 @@ class ESP_simulation:
                             "ProtectBoardID": {"0": f"{self.active_protect_board_list[port]}"},
                             "TimerT1s": {"0": T1Timer_s},
                             "TimerT1ms": {"0": T1Timer_ms},
-                            "Status": {"0": 1},
+                            "Status": {"0": 134184960},
                             "Volt": {
                                 "0": int(self.voltage[port] * 1000),
                                 "1": int(self.voltage[port] * 1000),
@@ -795,7 +812,7 @@ class ESP_simulation:
                             "ProtectBoardID": {"0": f"{self.active_protect_board_list[port]}"},
                             "TimerT1s": {"0": T1Timer_s},
                             "TimerT1ms": {"0": T1Timer_ms},
-                            "Status": {"0": 0},
+                            "Status": {"0": 134184960},
                             "Position": {"0": 0},
                             "RSSI": {"0": 0},
                             "WarCnt": {"0": 0},
@@ -813,7 +830,7 @@ class ESP_simulation:
                             "ProtectBoardID": {"0": f"{self.active_protect_board_list[port]}"},
                             "TimerT1s": {"0": T1Timer_s},
                             "TimerT1ms": {"0": T1Timer_ms},
-                            "Status": {"0": 0},
+                            "Status": {"0": 134184960},
                             "Position": {"0": 1},
                             "RSSI": {"0": 0},
                             "WarCnt": {"0": 0},
@@ -832,7 +849,7 @@ class ESP_simulation:
                             "ProtectBoardID": {"0": f"{self.active_protect_board_list[port]}"},
                             "TimerT1s": {"0": T1Timer_s},
                             "TimerT1ms": {"0": T1Timer_ms},
-                            "Status": {"0": 0},
+                            "Status": {"0": 134184960},
                             "Position": {"0": 1},
                             "RSSI": {"0": 0},
                             "WarCnt": {"0": 0},
@@ -850,7 +867,7 @@ class ESP_simulation:
                             "ProtectBoardID": {"0": f"{self.active_protect_board_list[port]}"},
                             "TimerT1s": {"0": T1Timer_s},
                             "TimerT1ms": {"0": T1Timer_ms},
-                            "Status": {"0": 0},
+                            "Status": {"0": 134184960},
                             "Position": {"0": 0},
                             "RSSI": {"0": 0},
                             "WarCnt": {"0": 0},

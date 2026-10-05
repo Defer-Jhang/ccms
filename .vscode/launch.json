@@ -65,6 +65,20 @@
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal",
             "justMyCode": true
+        },
+        {
+            "name": "Debug Functional Automation",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "unittest",
+            "args": [
+                "tests.test_functional_automation.CCMSFixtureTest.test_protect_parameter_duplicate_xml_key_is_rejected",
+                "-v"
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "stopOnEntry": true
         }
     ]
 }

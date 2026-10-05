@@ -311,68 +311,218 @@ class meas_api:
             # self.logging.info(data)
             raise
 
-    def data_reorganization(self, meas_map_res, data, idx, position_value_to_key, sorted_position_values):
+    def data_reorganization(
+        self,
+        meas_map_res,
+        data,
+        idx,
+        position_value_to_key,
+        sorted_position_values
+    ):
         """
-        Reorganize measurement data for influx db
+        Reorganize measurement data for InfluxDB.
 
         Args:
-            meas_map_res: Measurement mapping table result
-            data: Measurement device data
-            idx: Channel index
-            position_value_to_key: Mapping of position values to keys
-            sorted_position_values: Sorted list of position values
+            meas_map_res: Measurement mapping table result.
+            data: Measurement device data.
+            idx: Channel index.
+            position_value_to_key: Mapping of Position value to source data key.
+            sorted_position_values: Sorted list of available Position values.
 
         Returns:
-            None
-
-        Example:
-            >>> meas_obj = meas_api()
-            >>> meas_obj.data_reorganization(meas_map_res, data, idx)
+            dict: Reorganized measurement data.
         """
         try:
             result = {}
-            result[self.db_out[0]["field"][0]] = datetime.fromtimestamp(data.get("TimerT1s", {}).get("0", 0))
+
+            # Normalize channel index to integer.
+            current_idx = int(idx)
+
+            # Get error-related dictionaries once.
+            error_code_data = data.get("ErrorCode", {})
+            error_value_data = data.get("ErrorValue", {})
+
+            # ---------------------------------------------------------
+            # Basic information
+            # ---------------------------------------------------------
+            result[self.db_out[0]["field"][0]] = datetime.fromtimestamp(
+                data.get("TimerT1s", {}).get("0", 0)
+            )
+
             result[self.db_out[0]["field"][1]] = meas_map_res["StoreHouseID"]
-            result[self.db_out[0]["field"][2]] = self.config_map.get("PalletPosition")["0"]
-            result[self.db_out[0]["field"][3]] = data.get("SerialBoardID", {}).get("0", 0)
-            result[self.db_out[0]["field"][4]] = int(idx)
-            result[self.db_out[0]["field"][40]] = data.get("Status", {}).get("0", 0)
+
+            result[self.db_out[0]["field"][2]] = self.config_map.get(
+                "PalletPosition"
+            )["0"]
+
+            result[self.db_out[0]["field"][3]] = data.get(
+                "SerialBoardID", {}
+            ).get("0", 0)
+
+            result[self.db_out[0]["field"][4]] = current_idx
+
+            result[self.db_out[0]["field"][40]] = data.get(
+                "Status", {}
+            ).get("0", 0)
+
             result[self.db_out[0]["field"][5]] = meas_map_res["QRCodeID"]
+
             result[self.db_out[0]["field"][6]] = {
                 0: "OK",
                 1: "NG",
                 2: "Water"
-            }.get(int(data.get("ReturnCode", {}).get("0", 0)), "Undefine")
-            result[self.db_out[0]["field"][7]] = float(data.get("Volt", {}).get(str(idx - 1), 0) / 1000)
-            result[self.db_out[0]["field"][8]] = float((data.get("Temp", {}).get(str(idx - 1), 0)) / 10)
-            result[self.db_out[0]["field"][9]] = data.get("Curr", {}).get("0", 0) / 1000
-            result[self.db_out[0]["field"][11]] = data.get("ProtectBoardID", {}).get("0", 0)
-            result[self.db_out[0]["field"][13]] = data.get("FETState", {}).get("0", 0)
-            result[self.db_out[0]["field"][14]] = data.get("Fuse", {}).get("0", 0)
-            result[self.db_out[0]["field"][15]] = data.get("AFE", {}).get("0", 0)
-            result[self.db_out[0]["field"][16]] = data.get("WifiSTDisConn", {}).get("0", 0)
-            result[self.db_out[0]["field"][17]] = data.get("WifiLTDisConn", {}).get("0", 0)
-            result[self.db_out[0]["field"][18]] = data.get("SocketSTDisConn", {}).get("0", 0)
-            result[self.db_out[0]["field"][19]] = data.get("SocketLTDisConn", {}).get("0", 0)
-            result[self.db_out[0]["field"][20]] = data.get("HeartbeatTxCount", {}).get("0", 0)
-            result[self.db_out[0]["field"][21]] = data.get("HeartbeatLossCount", {}).get("0", 0)
-            result[self.db_out[0]["field"][22]] = data.get("HeartbeatLastRttMs", {}).get("0", 0)
-            result[self.db_out[0]["field"][23]] = data.get("HeartbeatRttMaxMs", {}).get("0", 0)
-            result[self.db_out[0]["field"][24]] = data.get("HeatbeatTimeoutFlag", {}).get("0", 0)
-            result[self.db_out[0]["field"][25]] = data.get("WifiReconnLastMs", {}).get("0", 0)
-            result[self.db_out[0]["field"][26]] = data.get("WifiReconnAvgMs", {}).get("0", 0)
-            result[self.db_out[0]["field"][27]] = data.get("WifiReconnTimes", {}).get("0", 0)
-            result[self.db_out[0]["field"][28]] = data.get("SocketReconnLastMs", {}).get("0", 0)
-            result[self.db_out[0]["field"][29]] = data.get("SocketReconnAvgMs", {}).get("0", 0)
-            result[self.db_out[0]["field"][30]] = data.get("SocketReconnMaxMs", {}).get("0", 0)
-            result[self.db_out[0]["field"][31]] = data.get("SocketReconnTimes", {}).get("0", 0)
-            result[self.db_out[0]["field"][38]] = data.get("ErrorValue", {}).get("0", -9999)
+            }.get(
+                int(data.get("ReturnCode", {}).get("0", 0)),
+                "Undefine"
+            )
+
+            # ---------------------------------------------------------
+            # Cell measurement
+            # Volt / Temp are still indexed by Cell 1~6 directly.
+            # ---------------------------------------------------------
+            result[self.db_out[0]["field"][7]] = float(
+                data.get("Volt", {}).get(str(current_idx - 1), 0) / 1000
+            )
+
+            result[self.db_out[0]["field"][8]] = float(
+                data.get("Temp", {}).get(str(current_idx - 1), 0) / 10
+            )
+
+            result[self.db_out[0]["field"][9]] = (
+                data.get("Curr", {}).get("0", 0) / 1000
+            )
+
+            result[self.db_out[0]["field"][11]] = data.get(
+                "ProtectBoardID", {}
+            ).get("0", 0)
+
+            result[self.db_out[0]["field"][13]] = data.get(
+                "FETState", {}
+            ).get("0", 0)
+
+            result[self.db_out[0]["field"][14]] = data.get(
+                "Fuse", {}
+            ).get("0", 0)
+
+            result[self.db_out[0]["field"][15]] = data.get(
+                "AFE", {}
+            ).get("0", 0)
+
+            result[self.db_out[0]["field"][16]] = data.get(
+                "WifiSTDisConn", {}
+            ).get("0", 0)
+
+            result[self.db_out[0]["field"][17]] = data.get(
+                "WifiLTDisConn", {}
+            ).get("0", 0)
+
+            result[self.db_out[0]["field"][18]] = data.get(
+                "SocketSTDisConn", {}
+            ).get("0", 0)
+
+            result[self.db_out[0]["field"][19]] = data.get(
+                "SocketLTDisConn", {}
+            ).get("0", 0)
+
+            result[self.db_out[0]["field"][20]] = data.get(
+                "HeartbeatTxCount", {}
+            ).get("0", 0)
+
+            result[self.db_out[0]["field"][21]] = data.get(
+                "HeartbeatLossCount", {}
+            ).get("0", 0)
+
+            result[self.db_out[0]["field"][22]] = data.get(
+                "HeartbeatLastRttMs", {}
+            ).get("0", 0)
+
+            result[self.db_out[0]["field"][23]] = data.get(
+                "HeartbeatRttMaxMs", {}
+            ).get("0", 0)
+
+            result[self.db_out[0]["field"][24]] = data.get(
+                "HeatbeatTimeoutFlag", {}
+            ).get("0", 0)
+
+            result[self.db_out[0]["field"][25]] = data.get(
+                "WifiReconnLastMs", {}
+            ).get("0", 0)
+
+            result[self.db_out[0]["field"][26]] = data.get(
+                "WifiReconnAvgMs", {}
+            ).get("0", 0)
+
+            result[self.db_out[0]["field"][27]] = data.get(
+                "WifiReconnTimes", {}
+            ).get("0", 0)
+
+            result[self.db_out[0]["field"][28]] = data.get(
+                "SocketReconnLastMs", {}
+            ).get("0", 0)
+
+            result[self.db_out[0]["field"][29]] = data.get(
+                "SocketReconnAvgMs", {}
+            ).get("0", 0)
+
+            result[self.db_out[0]["field"][30]] = data.get(
+                "SocketReconnMaxMs", {}
+            ).get("0", 0)
+
+            result[self.db_out[0]["field"][31]] = data.get(
+                "SocketReconnTimes", {}
+            ).get("0", 0)
+
+            # ---------------------------------------------------------
+            # Cell ErrorCode / ErrorValue
+            #
+            # IMPORTANT:
+            # ErrorCode and ErrorValue must be matched through Position.
+            #
+            # Example:
+            # Position["5"] = 7
+            # ErrorValue["5"] = 2620
+            #
+            # This belongs to Current(Position 7), NOT Cell 6.
+            # ---------------------------------------------------------
+            if current_idx in sorted_position_values:
+                cell_error_key = position_value_to_key.get(current_idx)
+            else:
+                cell_error_key = None
+
+            if cell_error_key is not None:
+                # Cell error code
+                result[self.db_out[0]["field"][10]] = error_code_data.get(
+                    cell_error_key,
+                    "OK"
+                )
+
+                # Cell error value
+                try:
+                    result[self.db_out[0]["field"][38]] = float(
+                        error_value_data.get(
+                            cell_error_key,
+                            -9999.0
+                        )
+                    )
+                except (TypeError, ValueError):
+                    result[self.db_out[0]["field"][38]] = -9999.0
+
+            else:
+                # No error information for this Cell position.
+                result[self.db_out[0]["field"][10]] = "OK"
+                result[self.db_out[0]["field"][38]] = -9999.0
+
+            # ---------------------------------------------------------
+            # Wire voltage
+            # ---------------------------------------------------------
             wire_volt = data.get("WireVolt", {})
+
             result[self.db_out[0]["field"][33]] = wire_volt.get("0", 0)
             result[self.db_out[0]["field"][34]] = wire_volt.get("1", 0)
             result[self.db_out[0]["field"][35]] = wire_volt.get("2", 0)
             result[self.db_out[0]["field"][36]] = wire_volt.get("3", 0)
             result[self.db_out[0]["field"][37]] = wire_volt.get("4", 0)
+
             values = [
                 wire_volt.get("0", 0),
                 wire_volt.get("1", 0),
@@ -380,30 +530,65 @@ class meas_api:
                 wire_volt.get("3", 0),
                 wire_volt.get("4", 0)
             ]
-            abnormal = [(v >= int(self.config_map.get("Cell_Delta_Wire_Voltage")["0"])) for v in values]
+
+            abnormal = [
+                (
+                    v >= int(
+                        self.config_map.get(
+                            "Cell_Delta_Wire_Voltage"
+                        )["0"]
+                    )
+                )
+                for v in values
+            ]
+
             error_pairs = []
 
             for i in range(len(abnormal)):
                 if abnormal[i]:
-                    error_pairs.append(f"[CH{i+1},CH{i+2} NG] ")
+                    error_pairs.append(
+                        f"[CH{i + 1},CH{i + 2} NG] "
+                    )
 
-            result[self.db_out[0]["field"][12]] = " ".join(error_pairs) if error_pairs else "OK"
+            result[self.db_out[0]["field"][12]] = (
+                " ".join(error_pairs)
+                if error_pairs
+                else "OK"
+            )
 
+            # ---------------------------------------------------------
+            # Current ErrorCode / ErrorValue
+            #
+            # Position 7 is reserved for current-related errors.
+            # Example:
+            # Position = 7
+            # ErrorCode = OC / UC
+            # ErrorValue = current error value
+            # ---------------------------------------------------------
             if 7 in sorted_position_values:
-                error_code_key = position_value_to_key.get(7)
-                result[self.db_out[0]["field"][32]] = data.get("ErrorCode", {}).get(error_code_key, 0) if error_code_key is not None else 0
-                result[self.db_out[0]["field"][39]] = data.get("ErrorValue", {}).get(error_code_key, 0)  if error_code_key is not None else -9999
+                current_error_key = position_value_to_key.get(7)
+            else:
+                current_error_key = None
+
+            if current_error_key is not None:
+                result[self.db_out[0]["field"][32]] = error_code_data.get(
+                    current_error_key,
+                    "OK"
+                )
+
+                try:
+                    result[self.db_out[0]["field"][39]] = float(
+                        error_value_data.get(
+                            current_error_key,
+                            -9999.0
+                        )
+                    )
+                except (TypeError, ValueError):
+                    result[self.db_out[0]["field"][39]] = -9999.0
+
             else:
                 result[self.db_out[0]["field"][32]] = "OK"
-                result[self.db_out[0]["field"][39]] = -9999
-
-            if idx in sorted_position_values:
-                error_code_key = position_value_to_key.get(idx)
-                result[self.db_out[0]["field"][10]] = data.get("ErrorCode", {}).get(error_code_key, 0) if error_code_key is not None else 0
-            else:
-                result[self.db_out[0]["field"][10]] = "OK"
-
-            # result[self.db_out[0]["field"][11]] = data.get("ProtectBoardID")["0"]
+                result[self.db_out[0]["field"][39]] = -9999.0
 
             return result
 

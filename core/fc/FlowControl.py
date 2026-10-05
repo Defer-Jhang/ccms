@@ -13,7 +13,7 @@ import balps.mssql_mgr
 import balps.influxdb_mgr
 import balps.meas_map_mgr
 from balps.log_mgr import logging_api
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import redis
 import xml.etree.ElementTree as ET  # noqa: S405
 import xml.dom.minidom as minidom  # noqa: F401, S408
@@ -320,9 +320,49 @@ class FC_api:
         except Exception:
             pass
 
+    def _write_meas_session_index(self, device_info):
+        """Write the accepted W2002 pallet mapping and its session start time."""
+        try:
+            if device_info is None or device_info.empty:
+                return
+
+            session_index = device_info.rename(
+                columns={
+                    "QRCodeID": "QRCode",
+                    "DRCID": "ProtectBoardID",
+                    "Position": "PositionID",
+                }
+            ).copy()
+            # SQL datetime2 has no timezone information; store UTC to match InfluxDB.
+            session_index["StartTime"] = datetime.now(timezone.utc).replace(tzinfo=None)
+            session_index["StoreHouseID"] = session_index["StoreHouseID"].astype(int)
+            session_index["PositionID"] = session_index["PositionID"].astype(int)
+            session_index = session_index[
+                [
+                    "QRCode",
+                    "StartTime",
+                    "SerialBoardID",
+                    "ProtectBoardID",
+                    "StoreHouseID",
+                    "PalletPosition",
+                    "PositionID",
+                    "PalletID",
+                ]
+            ]
+            self.mssql_obj.write_db_pd(session_index, "MeasSessionIndex")
+        except Exception:
+            self._safe_log_request_error(
+                f"write_meas_session_index failed [{self.sbid}]\n"
+                f"{self.logger.get_slim_error_log()}"
+            )
+            raise
+
     def _close_failed_task(self, error):
         """ACK the failure, close the task, and stop this FC service."""
-        self._push_failure_ack(error)
+        # A validation failure must still be reported even when the request
+        # was replayed with ``skip_reply`` during recovery.  The skip flag is
+        # only for a successful internal replay; it must not hide an NG ACK.
+        self._push_failure_ack(error, force=True)
         self._safe_log_request_error(str(error))
         self.running = False
         try:
@@ -346,15 +386,81 @@ class FC_api:
             except Exception:
                 pass
 
-    def _close_failed_recovery_task(self):
-        """Close an unfinished task immediately instead of replaying it."""
-        self._close_failed_task(
-            RuntimeError(
-                f"Task recovery is disabled [{self.sbid}] [{self.port}]"
-            )
-        )
+    @staticmethod
+    def _has_recovery_payload(value):
+        """Return whether a persisted recovery field contains usable data."""
+        if value is None:
+            return False
+        try:
+            if pd.isna(value):
+                return False
+        except (TypeError, ValueError):
+            return False
+        return bool(str(value).strip())
 
-    def _push_failure_ack(self, error, context=None):
+    def _recover_task_state(self, result_df):
+        """Replay persisted requests after a recoverable ESP reconnect.
+
+        A Task row is not, by itself, a parsing failure.  Invalid XML or
+        protection parameters are handled by ``_close_failed_task`` when the
+        request is consumed.  If the ESP disconnects afterwards, the active
+        Task row is the checkpoint used to replay the last W2002/W2003 request.
+        """
+        if result_df is None or result_df.empty:
+            return False
+
+        task_row = result_df.iloc[0]
+        pallet_info = task_row.get("pallet_info")
+        step_info = task_row.get("step_info")
+        task_step = task_row.get("task_step")
+        has_pallet_info = self._has_recovery_payload(pallet_info)
+        has_step_info = self._has_recovery_payload(step_info)
+
+        if not has_pallet_info and not has_step_info:
+            raise ValueError(
+                f"Active task has no persisted recovery payload [{self.sbid}]"
+            )
+
+        recovery_step = None
+        if has_step_info:
+            try:
+                recovery_step = int(task_step)
+            except (TypeError, ValueError) as error:
+                raise ValueError(
+                    f"Invalid persisted task_step for recovery "
+                    f"[{self.sbid}]: {task_step}"
+                ) from error
+
+        if has_pallet_info:
+            self.redis_obj.rpush(self.sbid, str(pallet_info))
+            self.skip_w2002_reply = True
+            self.logging.debug(
+                f"FC Task State Recovery [W2002] [{self.sbid}]"
+            )
+            self.influxdb_obj.write_log_influxdb(
+                "INFO",
+                f"FC Task State Recovery [W2002] [{self.sbid}]",
+                self.sbid,
+            )
+
+        if has_step_info:
+            self.redis_obj.rpush(self.sbid, str(step_info))
+            self.skip_w2003_reply = True
+            self.skip_w2003_step = recovery_step
+            self.logging.debug(
+                f"FC Task State Recovery [W2003-{recovery_step}] "
+                f"[{self.sbid}]"
+            )
+            self.influxdb_obj.write_log_influxdb(
+                "INFO",
+                f"FC Task State Recovery [W2003-{recovery_step}] "
+                f"[{self.sbid}]",
+                self.sbid,
+            )
+
+        return has_pallet_info or has_step_info
+
+    def _push_failure_ack(self, error, context=None, force=False):
         # Push exactly one failure ACK for the current upstream request.
         if context is None:
             context = self.active_request_context
@@ -369,7 +475,7 @@ class FC_api:
 
         # Recovery messages are internal replays and must not create a second
         # reply to an already completed upstream request.
-        if context.get("skip_reply"):
+        if context.get("skip_reply") and not force:
             self._complete_request_context(context)
             return False
 
@@ -497,6 +603,7 @@ class FC_api:
                     self.alg_executor.set_configuration(self.meas_map_obj, "Config")
                     # Update the task information
                     self.meas_map_obj.update_task_info(xml_string)
+                    self._write_meas_session_index(device_info)
                     # Save the request context before the cache is changed by next request.
                     response_data = self.meas_map_obj.get_task_info()
                     request_context["response_data"] = response_data
@@ -604,8 +711,15 @@ class FC_api:
                         result_df = self.mssql_obj.query_db_pd(query)
 
                         if not result_df.empty:
-                            self._close_failed_recovery_task()
-                            return
+                            try:
+                                self._recover_task_state(result_df)
+                            except ValueError as error:
+                                # A corrupt persisted checkpoint cannot be
+                                # replayed safely.  This is different from a
+                                # normal ESP disconnect, so close only this
+                                # invalid recovery state.
+                                self._close_failed_task(error)
+                                return
 
                     self.is_first_round=False
                     self.influxdb_obj.write_log_influxdb("INFO", f"Connection ESP Device Ready [{self.sbid}]", self.sbid)
@@ -738,6 +852,11 @@ class FC_api:
                 # Send the response data to the redis queue
                 # self.logging.debug(f"[RspCCS]\n" + self.influxdb_obj.reformat_json_horizontal(response_data))
         except Exception as error:
+            # Keep the persisted Task alive here.  ``run_meas`` can fail
+            # because the ESP socket temporarily disconnected; the next
+            # connection will replay the checkpoint in ``init_algorithm``.
+            # The current request still receives an NG ACK when possible, but
+            # this path must not call ``_close_failed_task``.
             self._push_failure_ack(error, request_context)
             self._safe_log_request_error(
                 "run_algorithm failed ["
@@ -771,7 +890,7 @@ class FC_api:
 
             # Write the measurement data to influxdb
             for _ in range(len(self.config_data["meas"][meas_id]["db_out"])):
-                self.influxdb_obj.write_pd_influxdb(self.meas_out_pd, "meas_data", ["storehouse_id", "pallet_position", "serialboard_id", "protectboard_id", "position_id", "qrcode", "return_code"])
+                self.influxdb_obj.write_pd_influxdb(self.meas_out_pd, "meas_data", ["pallet_position", "position_id", "return_code", "storehouse_id"])
             
             self.last_meas_write_time = time.time()
         except Exception:

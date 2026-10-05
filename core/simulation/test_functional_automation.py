@@ -459,6 +459,41 @@ class CCMSFixtureTest(unittest.TestCase):
         self.assertEqual(["L", "R"], [pallet.findtext("PalletPosition") for pallet in pallets])
         self.assertEqual(["C00001", "C00002"], [pallet.findtext("SerialBoardID") for pallet in pallets])
 
+    def test_c02_w2002_large_recipe_alternates_15_steps_and_ends_end(self):
+        """Verify the 15-step W2002 recipe alternates CC/REST and ends with END."""
+        server = object.__new__(XMLSocketServer)
+        server.meas_map = self.frame
+        request = server.create_request_w2002_xml_large(
+            "StoreHouseStatusRequest",
+            "T-2015",
+            1,
+        )
+        root = ET.fromstring(request)  # noqa: S314
+        steps = root.findall("./BODY/RecipeInfo/RecipeStep")
+        modes = [step.findtext("Control_Mode") for step in steps]
+        expected_modes = [
+            "START_CC" if step % 2 else "REST"
+            for step in range(1, 15)
+        ] + ["END"]
+
+        self.assertEqual(15, len(steps))
+        self.assertEqual(
+            [str(step) for step in range(1, 16)],
+            [step.findtext("Step") for step in steps],
+        )
+        self.assertEqual(expected_modes, modes)
+        self.assertEqual("END", modes[-1])
+        self.assertEqual(1, modes.count("END"))
+        self.assertEqual(
+            ["PCB5001001", "PCB5002001"],
+            [pallet.findtext("DRCID") for pallet in root.findall("./BODY/PalletInfo/Pallet")],
+        )
+
+        parser = meas_map_api(self.influx, protect_params=self.params)
+        parsed = parser.parse_config_info(request)
+        self.assertEqual(30, len(parsed))
+        self.assertEqual(2, (parsed["Control_Mode"] == "END").sum())
+
     def test_c02_w2002_config_parser_accepts_exact_recipe_and_rejects_whole_request_on_mismatch(self):
         server = object.__new__(XMLSocketServer)
         server.meas_map = self.frame
@@ -695,21 +730,21 @@ class CCMSFixtureTest(unittest.TestCase):
         with self.assertRaises(KeyError):
             parser.parse_config_info(xml_bytes(root))
 
-    @unittest.expectedFailure
     def test_protect_parameter_duplicate_xml_key_is_rejected(self):
-        """Duplicate XML keys must be rejected instead of silently taking first."""
+        """Reject duplicate XML keys when all occurrences have the same value."""
 
         parser = meas_map_api(self.influx, protect_params=self.params)
         duplicate = recipe_step_xml(self.params, duplicate_key="Cell_Max_Current")
-        with self.assertRaises(KeyError):
+        with self.assertRaisesRegex(KeyError, "Duplicate XML protect parameter key.*same value"):
             parser.parse_protect_params(duplicate)
 
-    @unittest.expectedFailure
     def test_protect_parameter_duplicate_xml_key_with_different_values_is_rejected(self):
+        """Reject duplicate XML keys when occurrences contain different values."""
+
         parser = meas_map_api(self.influx, protect_params=self.params)
         duplicate = recipe_step_xml(self.params, duplicate_key="Cell_Max_Current")
         duplicate.findall("Cell_Max_Current")[-1].text = "99"
-        with self.assertRaises(KeyError):
+        with self.assertRaisesRegex(KeyError, "Duplicate XML protect parameter key.*different values"):
             parser.parse_protect_params(duplicate)
 
     def test_unknown_message_mapping_is_not_silently_routed(self):

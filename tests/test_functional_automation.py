@@ -87,6 +87,16 @@ class FakeLogging:
         return ""
 
 
+class FakeRedis:
+    """Minimal Redis list sink for recovery-state unit tests."""
+
+    def __init__(self):
+        self.pushed: list[tuple[str, object]] = []
+
+    def rpush(self, key, value):
+        self.pushed.append((key, value))
+
+
 def mapping_path() -> Path:
     """Return the user mapping when present, otherwise the checked-in map."""
 
@@ -301,7 +311,11 @@ class CCMSFixtureTest(unittest.TestCase):
         "test_c01_time_sync_and_alive_xml_contract": "C01-1/C01-2 W0001/W0002 XML",
         "test_c01_task_ready_requires_both_serial_tasks": "C01-3 both tasks ready",
         "test_c01_mpd_heartbeat_timeout_uses_60_second_threshold": "C01-4 MPD heartbeat 60s",
+        "test_c01_reconnect_replays_active_task_state": "C01-5 ESP reconnect recovery",
+        "test_c01_corrupt_recovery_checkpoint_is_rejected": "C01-5 invalid recovery checkpoint",
+        "test_c01_validation_failure_forces_ng_during_recovery": "C01-5 recovery validation NG",
         "test_c02_w2002_has_three_steps_and_all_c07_thresholds": "C02-1 W2002 recipe",
+        "test_c02_w2002_large_recipe_alternates_15_steps_and_ends_end": "C02-1 15-step CC/REST",
         "test_c02_w2002_config_parser_accepts_exact_recipe_and_rejects_whole_request_on_mismatch": "C02-1 key mismatch reject",
         "test_c02_w2003_switch_protection_parameter_reply": "C02-2 W2003 REST/CC/END",
         "test_c03_w2004_status_priority_ok_ng_water": "C03 W2004 OK/NG/Water",
@@ -506,6 +520,106 @@ class CCMSFixtureTest(unittest.TestCase):
         self.assertEqual(1, len(flow.mssql_obj.clears))
         self.assertEqual("C00001", flow.mssql_obj.clears[0]["sb_id"])
 
+    def test_c01_reconnect_replays_active_task_state(self):
+        flow = object.__new__(FC_api)
+        flow.sbid = "C00001"
+        flow.skip_w2002_reply = False
+        flow.skip_w2003_reply = False
+        flow.skip_w2003_step = None
+        flow.redis_obj = FakeRedis()
+        flow.logging = FakeLogging()
+        flow.influxdb_obj = self.influx
+
+        result_df = pd.DataFrame(
+            [
+                {
+                    "pallet_info": "<W2002 />",
+                    "step_info": "<W2003 />",
+                    "task_step": 2,
+                }
+            ]
+        )
+
+        self.assertTrue(flow._recover_task_state(result_df))
+        self.assertEqual(
+            [
+                ("C00001", "<W2002 />"),
+                ("C00001", "<W2003 />"),
+            ],
+            flow.redis_obj.pushed,
+        )
+        self.assertTrue(flow.skip_w2002_reply)
+        self.assertTrue(flow.skip_w2003_reply)
+        self.assertEqual(2, flow.skip_w2003_step)
+
+    def test_c01_corrupt_recovery_checkpoint_is_rejected(self):
+        flow = object.__new__(FC_api)
+        flow.sbid = "C00001"
+        flow.redis_obj = FakeRedis()
+        flow.skip_w2002_reply = False
+        flow.skip_w2003_reply = False
+        flow.skip_w2003_step = None
+
+        result_df = pd.DataFrame(
+            [
+                {
+                    "pallet_info": "<W2002 />",
+                    "step_info": "<W2003 />",
+                    "task_step": "not-a-step",
+                }
+            ]
+        )
+
+        with self.assertRaises(ValueError):
+            flow._recover_task_state(result_df)
+        self.assertEqual([], flow.redis_obj.pushed)
+
+    def test_c01_validation_failure_forces_ng_during_recovery(self):
+        flow = object.__new__(FC_api)
+        flow.sbid = "C00001"
+        flow.shid = 1
+        flow.pbid = ""
+        flow.redis_obj = FakeRedis()
+        flow.logging = FakeLogging()
+        flow.influxdb_obj = self.influx
+        flow.alg_executor = None
+        flow.active_request_context = None
+        flow.pending_ack_queue = []
+        flow.running = True
+        flow.skip_w2002_reply = True
+        flow.skip_w2003_reply = False
+        flow.skip_w2003_step = None
+        flow.conn_obj = None
+        flow.server_socket = None
+
+        class MSSQL:
+            def __init__(self):
+                self.clears = []
+
+            def clear_task_table(self, **kwargs):
+                self.clears.append(kwargs)
+
+        flow.mssql_obj = MSSQL()
+        context = {
+            "response_data": TaskInfo(),
+            "message_name": "StoreHouseStatusRequest",
+            "skip_reply": True,
+            "completed": False,
+            "ack_sent": False,
+            "step": None,
+        }
+        flow.active_request_context = context
+        flow.pending_ack_queue.append(context)
+
+        flow._close_failed_task(ValueError("invalid protection parameter"))
+
+        self.assertFalse(flow.running)
+        self.assertEqual(1, len(flow.mssql_obj.clears))
+        self.assertEqual("ACK", flow.redis_obj.pushed[0][0])
+        failure_ack = json.loads(flow.redis_obj.pushed[0][1].decode("utf-8"))
+        self.assertEqual("1", failure_ack["ReturnCode"]["0"])
+        self.assertIn("invalid protection parameter", failure_ack["ReturnMessage"]["0"])
+
     def test_c02_w2002_has_three_steps_and_all_c07_thresholds(self):
         server = object.__new__(XMLSocketServer)
         server.meas_map = self.frame
@@ -527,6 +641,49 @@ class CCMSFixtureTest(unittest.TestCase):
         pallets = root.findall("./BODY/PalletInfo/Pallet")
         self.assertEqual(["L", "R"], [pallet.findtext("PalletPosition") for pallet in pallets])
         self.assertEqual(["C00001", "C00002"], [pallet.findtext("SerialBoardID") for pallet in pallets])
+
+    def test_c02_w2002_large_recipe_alternates_15_steps_and_ends_end(self):
+        """
+        Verify that the large W2002 recipe alternates CC and REST for 15 steps.
+
+        The protocol represents the CC mode as ``START_CC``. Steps 1 through
+        14 must alternate ``START_CC`` and ``REST``; step 15 must be ``END``.
+        The complete recipe is also passed through the CCMS protection parser.
+        """
+        server = object.__new__(XMLSocketServer)
+        server.meas_map = self.frame
+        request = server.create_request_w2002_xml_large(
+            "StoreHouseStatusRequest",
+            "T-2015",
+            1,
+        )
+        root = ET.fromstring(request)  # noqa: S314
+        steps = root.findall("./BODY/RecipeInfo/RecipeStep")
+        modes = [step.findtext("Control_Mode") for step in steps]
+        expected_modes = [
+            "START_CC" if step % 2 else "REST"
+            for step in range(1, 15)
+        ] + ["END"]
+
+        self.assertEqual(15, len(steps), "15 RecipeStep elements are required")
+        self.assertEqual(
+            [str(step) for step in range(1, 16)],
+            [step.findtext("Step") for step in steps],
+            "RecipeStep numbers must be sequential",
+        )
+        self.assertEqual(expected_modes, modes, "CC/REST alternation is incorrect")
+        self.assertEqual("END", modes[-1], "The final RecipeStep must be END")
+        self.assertEqual(1, modes.count("END"), "Only the final step may be END")
+        self.assertEqual(
+            ["PCB5001001", "PCB5002001"],
+            [pallet.findtext("DRCID") for pallet in root.findall("./BODY/PalletInfo/Pallet")],
+            "DRCID must carry the mapped ProtectBoardID",
+        )
+
+        parser = meas_map_api(self.influx, protect_params=self.params)
+        parsed = parser.parse_config_info(request)
+        self.assertEqual(30, len(parsed), "15 steps x 2 pallets must be parsed")
+        self.assertEqual(2, (parsed["Control_Mode"] == "END").sum())
 
     def test_c02_w2002_config_parser_accepts_exact_recipe_and_rejects_whole_request_on_mismatch(self):
         server = object.__new__(XMLSocketServer)
@@ -764,21 +921,21 @@ class CCMSFixtureTest(unittest.TestCase):
         with self.assertRaises(KeyError):
             parser.parse_config_info(xml_bytes(root))
 
-    @unittest.expectedFailure
     def test_protect_parameter_duplicate_xml_key_is_rejected(self):
-        """Duplicate XML keys must be rejected instead of silently taking first."""
+        """Reject duplicate XML keys when all occurrences have the same value."""
 
         parser = meas_map_api(self.influx, protect_params=self.params)
         duplicate = recipe_step_xml(self.params, duplicate_key="Cell_Max_Current")
-        with self.assertRaises(KeyError):
+        with self.assertRaisesRegex(KeyError, "Duplicate XML protect parameter key.*same value"):
             parser.parse_protect_params(duplicate)
 
-    @unittest.expectedFailure
     def test_protect_parameter_duplicate_xml_key_with_different_values_is_rejected(self):
+        """Reject duplicate XML keys when occurrences contain different values."""
+
         parser = meas_map_api(self.influx, protect_params=self.params)
         duplicate = recipe_step_xml(self.params, duplicate_key="Cell_Max_Current")
         duplicate.findall("Cell_Max_Current")[-1].text = "99"
-        with self.assertRaises(KeyError):
+        with self.assertRaisesRegex(KeyError, "Duplicate XML protect parameter key.*different values"):
             parser.parse_protect_params(duplicate)
 
     def test_unknown_message_mapping_is_not_silently_routed(self):

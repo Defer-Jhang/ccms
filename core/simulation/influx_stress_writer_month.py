@@ -103,6 +103,7 @@ class DeviceMapping:
     """Store one device mapping loaded from ServerMap.csv."""
 
     storehouse_id: str
+    pallet_id: str
     pallet_position: str
     serialboard_id: str
     protectboard_id: str
@@ -483,6 +484,11 @@ def load_servermap(
                     storehouse_id=(
                         row[
                             "StoreHouseID"
+                        ]
+                    ),
+                    pallet_id=(
+                        row[
+                            "PalletID"
                         ]
                     ),
                     pallet_position=(
@@ -974,6 +980,8 @@ BEGIN
 
         Status VARCHAR(20) NOT NULL,
 
+        PalletID VARCHAR(100) NULL,
+
         SerialBoardID VARCHAR(100) NULL,
 
         ProtectBoardID VARCHAR(100) NULL,
@@ -994,6 +1002,20 @@ BEGIN
                 SessionIndexID
             )
     );
+END;
+
+
+IF COL_LENGTH(N'dbo.MeasSessionIndex', N'PalletID') IS NULL
+BEGIN
+    ALTER TABLE dbo.MeasSessionIndex
+        ADD PalletID VARCHAR(100) NULL;
+END;
+
+
+IF COL_LENGTH(N'dbo.MeasSessionIndex', N'Status') IS NULL
+BEGIN
+    ALTER TABLE dbo.MeasSessionIndex
+        ADD Status VARCHAR(20) NULL;
 END;
 
 
@@ -1215,6 +1237,7 @@ def build_cycle_index_rows(
                     ],
                     cycle_start,
                     cfg.return_code,
+                    device.pallet_id,
                     device.serialboard_id,
                     device.protectboard_id,
                     int(
@@ -1286,6 +1309,7 @@ CREATE TABLE #MeasSessionStage
     QRCode VARCHAR(100) NOT NULL,
     StartTime DATETIME2(0) NOT NULL,
     Status VARCHAR(20) NOT NULL,
+    PalletID VARCHAR(100) NULL,
     SerialBoardID VARCHAR(100) NULL,
     ProtectBoardID VARCHAR(100) NULL,
     StoreHouseID INT NOT NULL,
@@ -1312,6 +1336,7 @@ INSERT INTO #MeasSessionStage
     QRCode,
     StartTime,
     Status,
+    PalletID,
     SerialBoardID,
     ProtectBoardID,
     StoreHouseID,
@@ -1320,7 +1345,7 @@ INSERT INTO #MeasSessionStage
 )
 VALUES
 (
-    ?, ?, ?, ?, ?, ?, ?, ?
+    ?, ?, ?, ?, ?, ?, ?, ?, ?
 );
 """,
                 rows,
@@ -1339,6 +1364,7 @@ INSERT INTO dbo.MeasSessionIndex
     QRCode,
     StartTime,
     Status,
+    PalletID,
     SerialBoardID,
     ProtectBoardID,
     StoreHouseID,
@@ -1349,6 +1375,7 @@ SELECT
     S.QRCode,
     S.StartTime,
     S.Status,
+    S.PalletID,
     S.SerialBoardID,
     S.ProtectBoardID,
     S.StoreHouseID,

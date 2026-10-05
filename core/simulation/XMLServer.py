@@ -253,7 +253,7 @@ class XMLSocketServer:
                 ET.SubElement(recipe_step, "Cell_Max_Voltage").text = "4.18"
                 ET.SubElement(recipe_step, "Cell_Min_Voltage").text = "0"
                 ET.SubElement(recipe_step, "Cell_Delta_Voltage").text = "300"
-                ET.SubElement(recipe_step, "Cell_Delta_Voltage_Delay").text = "5"
+                ET.SubElement(recipe_step, "Cell_Delta_Voltage_Time").text = "5"
                 ET.SubElement(recipe_step, "Cell_Max_Current").text = "25"
                 ET.SubElement(recipe_step, "Cell_Min_Current").text = "-1.5"
                 ET.SubElement(recipe_step, "Cell_Protect_Temp").text = "45"
@@ -273,7 +273,7 @@ class XMLSocketServer:
             pallet = ET.SubElement(pallet_info, "Pallet")
             ET.SubElement(pallet, "PalletID").text = self.meas_map[(self.meas_map["StoreHouseID"] == sh_id) & (self.meas_map["PalletPosition"] == "L")].iloc[0]["PalletID"]
             ET.SubElement(pallet, "SerialBoardID").text = self.meas_map[(self.meas_map["StoreHouseID"] == sh_id) & (self.meas_map["PalletPosition"] == "L")].iloc[0]["SerialBoardID"]
-            ET.SubElement(pallet, "DRCID").text = self.meas_map[(self.meas_map["StoreHouseID"] == sh_id) & (self.meas_map["PalletPosition"] == "L")].iloc[0]["SerialBoardID"]
+            ET.SubElement(pallet, "DRCID").text = self.meas_map[(self.meas_map["StoreHouseID"] == sh_id) & (self.meas_map["PalletPosition"] == "L")].iloc[0]["ProtectBoardID"]
             ET.SubElement(pallet, "PalletPosition").text = "L"
             qrcode_list = ET.SubElement(pallet, "QRCodeList")
             qrcode = ET.SubElement(qrcode_list, "QRCode")
@@ -310,7 +310,7 @@ class XMLSocketServer:
             pallet = ET.SubElement(pallet_info, "Pallet")
             ET.SubElement(pallet, "PalletID").text = self.meas_map[(self.meas_map["StoreHouseID"] == sh_id) & (self.meas_map["PalletPosition"] == "R")].iloc[0]["PalletID"]
             ET.SubElement(pallet, "SerialBoardID").text = self.meas_map[(self.meas_map["StoreHouseID"] == sh_id) & (self.meas_map["PalletPosition"] == "R")].iloc[0]["SerialBoardID"]
-            ET.SubElement(pallet, "DRCID").text = self.meas_map[(self.meas_map["StoreHouseID"] == sh_id) & (self.meas_map["PalletPosition"] == "R")].iloc[0]["SerialBoardID"]
+            ET.SubElement(pallet, "DRCID").text = self.meas_map[(self.meas_map["StoreHouseID"] == sh_id) & (self.meas_map["PalletPosition"] == "R")].iloc[0]["ProtectBoardID"]
             ET.SubElement(pallet, "PalletPosition").text = "R"
 
             qrcode_list = ET.SubElement(pallet, "QRCodeList")

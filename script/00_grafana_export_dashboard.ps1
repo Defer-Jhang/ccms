@@ -1,8 +1,8 @@
-param (
+﻿param (
     # Use root for dashboards directly under Grafana's root folder.
     # A named folder exports only dashboards directly in that folder;
     # dashboards in child folders are excluded.
-    [string]$FolderName = "root"
+    [string]$FolderName = "Root"
 )
 
 $ErrorActionPreference = "Stop"
@@ -16,7 +16,7 @@ $GrafanaUrl = "http://localhost:3000"
 $GrafanaUser = "admin"
 $GrafanaPassword = "11111111"
 
-$OutputDir = "C:\GrafanaExport"
+$OutputDir = ".\dashboard"
 
 
 # ============================================================
