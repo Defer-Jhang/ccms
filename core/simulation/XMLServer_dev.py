@@ -89,20 +89,26 @@ class XMLSocketServer:
             # rexit 後至少等幾秒才允許 rentry
             self.remote_reentry_after_exit_guard_sec = 10
 
+            self.enable_test_servermap_hook = os.environ.get("CCMS_ENABLE_TEST_SERVERMAP_HOOK", "0") == "1"
 
             # Get charging cabinet information
             # The ServerMap table has StoreHouseID, PalletID, SerialBoardID, PalletPosition, Position and QRCODEID fields
             self.mssql_obj = balps.mssql_mgr.mssql_api()
             self.mssql_obj.create_db_connect_pd()
-            self.meas_map = self.mssql_obj.query_db_pd("SELECT * FROM CCSMap")
+
+            if self.enable_test_servermap_hook:
+                self.meas_map = self.mssql_obj.query_db_pd("SELECT * FROM CCSMap_peter")
+            else:
+                self.meas_map = self.mssql_obj.query_db_pd("SELECT * FROM CCSMap")
+            
             self.influxdb_obj = balps.influxdb_mgr.influxdb_api()
             self.influxdb_obj.create_connect()
             self.ccs_api = None
 
             self.network_connected = True
             self.enable_artifact_hook = os.environ.get("CCMS_ENABLE_ARTIFACT_HOOK", "0") == "1"
-
-
+            self.enable_artifact_alive_hook = os.environ.get("CCMS_ENABLE_ARTIFACT_ALIVE_HOOK", "0") == "1"
+            self.enable_artifact_sync_hook = os.environ.get("CCMS_ENABLE_ARTIFACT_SYNC_HOOK", "0") == "1"
 
         except Exception:
             self.logging.error(f"Xml server initialization failed\n{self.logger.get_slim_error_log()}")
@@ -158,7 +164,11 @@ class XMLSocketServer:
             body = ET.SubElement(response_root, "BODY")
             ET.SubElement(body, "TRX_ID").text = transaction_id
             ET.SubElement(body, "LINE_ID").text = "SECCHARGE0100"
-            ET.SubElement(body, "SYSTIME").text = datetime.now().strftime("%Y%m%d%H%M%S")
+            
+            if self.enable_artifact_sync_hook:
+                ET.SubElement(body, "SYSTIME").text = (datetime.now() + timedelta(hours=-3)).strftime("%Y%m%d%H%M%S")
+            else:
+                ET.SubElement(body, "SYSTIME").text = datetime.now().strftime("%Y%m%d%H%M%S")
 
             ret = ET.SubElement(response_root, "RETURN")
             ET.SubElement(ret, "RETURNCODE").text = "0"
@@ -289,7 +299,7 @@ class XMLSocketServer:
                 ET.SubElement(recipe_step, "Cell_Max_Voltage").text = "4.18"
                 ET.SubElement(recipe_step, "Cell_Min_Voltage").text = "0"
                 ET.SubElement(recipe_step, "Cell_Delta_Voltage").text = "300"
-                ET.SubElement(recipe_step, "Cell_Delta_Voltage_Delay").text = "5"
+                ET.SubElement(recipe_step, "Cell_Delta_Voltage_Time").text = "5"
                 ET.SubElement(recipe_step, "Cell_Max_Current").text = "25"
                 ET.SubElement(recipe_step, "Cell_Min_Current").text = "-1.5"
                 ET.SubElement(recipe_step, "Cell_Protect_Temp").text = "45"
@@ -304,188 +314,6 @@ class XMLSocketServer:
                 ET.SubElement(recipe_step, "Cell_Delta_Temp_Delay").text = "1"
                 ET.SubElement(recipe_step, "Cell_Protect_Temp_Water").text = "90.1"
                 ET.SubElement(recipe_step, "Cell_Delta_Temp_Frame").text = "3"
-
-            pallet_info = ET.SubElement(body, "PalletInfo")
-            pallet = ET.SubElement(pallet_info, "Pallet")
-            ET.SubElement(pallet, "PalletID").text = self.meas_map[(self.meas_map["StoreHouseID"] == sh_id) & (self.meas_map["PalletPosition"] == "L")].iloc[0]["PalletID"]
-            ET.SubElement(pallet, "SerialBoardID").text = self.meas_map[(self.meas_map["StoreHouseID"] == sh_id) & (self.meas_map["PalletPosition"] == "L")].iloc[0]["SerialBoardID"]
-            ET.SubElement(pallet, "DRCID").text = self.meas_map[(self.meas_map["StoreHouseID"] == sh_id) & (self.meas_map["PalletPosition"] == "L")].iloc[0]["SerialBoardID"]
-            ET.SubElement(pallet, "PalletPosition").text = "L"
-            qrcode_list = ET.SubElement(pallet, "QRCodeList")
-            qrcode = ET.SubElement(qrcode_list, "QRCode")
-            ET.SubElement(qrcode, "Position").text = "1"
-            ET.SubElement(qrcode, "QRCODEID").text = self.meas_map[(self.meas_map["StoreHouseID"] == sh_id) & (self.meas_map["PalletPosition"] == "L") & (self.meas_map["Position"] == 1)].iloc[0][
-                "QRCODEID"
-            ]
-            qrcode = ET.SubElement(qrcode_list, "QRCode")
-            ET.SubElement(qrcode, "Position").text = "2"
-            ET.SubElement(qrcode, "QRCODEID").text = self.meas_map[(self.meas_map["StoreHouseID"] == sh_id) & (self.meas_map["PalletPosition"] == "L") & (self.meas_map["Position"] == 2)].iloc[0][
-                "QRCODEID"
-            ]
-            qrcode = ET.SubElement(qrcode_list, "QRCode")
-            ET.SubElement(qrcode, "Position").text = "3"
-            ET.SubElement(qrcode, "QRCODEID").text = self.meas_map[(self.meas_map["StoreHouseID"] == sh_id) & (self.meas_map["PalletPosition"] == "L") & (self.meas_map["Position"] == 3)].iloc[0][
-                "QRCODEID"
-            ]
-            qrcode = ET.SubElement(qrcode_list, "QRCode")
-            ET.SubElement(qrcode, "Position").text = "4"
-            ET.SubElement(qrcode, "QRCODEID").text = self.meas_map[(self.meas_map["StoreHouseID"] == sh_id) & (self.meas_map["PalletPosition"] == "L") & (self.meas_map["Position"] == 4)].iloc[0][
-                "QRCODEID"
-            ]
-            qrcode = ET.SubElement(qrcode_list, "QRCode")
-            ET.SubElement(qrcode, "Position").text = "5"
-            ET.SubElement(qrcode, "QRCODEID").text = self.meas_map[(self.meas_map["StoreHouseID"] == sh_id) & (self.meas_map["PalletPosition"] == "L") & (self.meas_map["Position"] == 5)].iloc[0][
-                "QRCODEID"
-            ]
-            qrcode = ET.SubElement(qrcode_list, "QRCode")
-            ET.SubElement(qrcode, "Position").text = "6"
-            ET.SubElement(qrcode, "QRCODEID").text = self.meas_map[(self.meas_map["StoreHouseID"] == sh_id) & (self.meas_map["PalletPosition"] == "L") & (self.meas_map["Position"] == 6)].iloc[0][
-                "QRCODEID"
-            ]
-
-            pallet = ET.SubElement(pallet_info, "Pallet")
-            ET.SubElement(pallet, "PalletID").text = self.meas_map[(self.meas_map["StoreHouseID"] == sh_id) & (self.meas_map["PalletPosition"] == "R")].iloc[0]["PalletID"]
-            ET.SubElement(pallet, "SerialBoardID").text = self.meas_map[(self.meas_map["StoreHouseID"] == sh_id) & (self.meas_map["PalletPosition"] == "R")].iloc[0]["SerialBoardID"]
-            ET.SubElement(pallet, "DRCID").text = self.meas_map[(self.meas_map["StoreHouseID"] == sh_id) & (self.meas_map["PalletPosition"] == "R")].iloc[0]["SerialBoardID"]
-            ET.SubElement(pallet, "PalletPosition").text = "R"
-
-            qrcode_list = ET.SubElement(pallet, "QRCodeList")
-            qrcode = ET.SubElement(qrcode_list, "QRCode")
-            ET.SubElement(qrcode, "Position").text = "1"
-            ET.SubElement(qrcode, "QRCODEID").text = self.meas_map[(self.meas_map["StoreHouseID"] == sh_id) & (self.meas_map["PalletPosition"] == "R") & (self.meas_map["Position"] == 1)].iloc[0][
-                "QRCODEID"
-            ]
-            qrcode = ET.SubElement(qrcode_list, "QRCode")
-            ET.SubElement(qrcode, "Position").text = "2"
-            ET.SubElement(qrcode, "QRCODEID").text = self.meas_map[(self.meas_map["StoreHouseID"] == sh_id) & (self.meas_map["PalletPosition"] == "R") & (self.meas_map["Position"] == 2)].iloc[0][
-                "QRCODEID"
-            ]
-            qrcode = ET.SubElement(qrcode_list, "QRCode")
-            ET.SubElement(qrcode, "Position").text = "3"
-            ET.SubElement(qrcode, "QRCODEID").text = self.meas_map[(self.meas_map["StoreHouseID"] == sh_id) & (self.meas_map["PalletPosition"] == "R") & (self.meas_map["Position"] == 3)].iloc[0][
-                "QRCODEID"
-            ]
-            qrcode = ET.SubElement(qrcode_list, "QRCode")
-            ET.SubElement(qrcode, "Position").text = "4"
-            ET.SubElement(qrcode, "QRCODEID").text = self.meas_map[(self.meas_map["StoreHouseID"] == sh_id) & (self.meas_map["PalletPosition"] == "R") & (self.meas_map["Position"] == 4)].iloc[0][
-                "QRCODEID"
-            ]
-            qrcode = ET.SubElement(qrcode_list, "QRCode")
-            ET.SubElement(qrcode, "Position").text = "5"
-            ET.SubElement(qrcode, "QRCODEID").text = self.meas_map[(self.meas_map["StoreHouseID"] == sh_id) & (self.meas_map["PalletPosition"] == "R") & (self.meas_map["Position"] == 5)].iloc[0][
-                "QRCODEID"
-            ]
-            qrcode = ET.SubElement(qrcode_list, "QRCode")
-            ET.SubElement(qrcode, "Position").text = "6"
-            ET.SubElement(qrcode, "QRCODEID").text = self.meas_map[(self.meas_map["StoreHouseID"] == sh_id) & (self.meas_map["PalletPosition"] == "R") & (self.meas_map["Position"] == 6)].iloc[0][
-                "QRCODEID"
-            ]
-
-            ret = ET.SubElement(response_root, "RETURN")
-            ET.SubElement(ret, "RETURNCODE").text = "0"
-            ET.SubElement(ret, "RETURNMESSAGE").text = ""
-
-            return ET.tostring(response_root, encoding="utf-8", short_empty_elements=False)
-        except Exception:
-            self.logging.error(f"create_reply_w1001_xml failed\n{self.logger.get_slim_error_log()}")
-
-    def create_request_w2002_xml(self, message_name, transaction_id, sh_id):
-        """Generates an xml request of w2002 command
-
-        Args:
-            message_name: Message name
-            transaction_id: Transaction id
-            sh_id: Store house id
-
-        Returns:
-            Xml request
-
-        Example:
-            >>> xml_socket_svr_obj = XMLSocketServer()
-            >>> xml_socket_svr_obj.create_request_w2002_xml(message_name, transaction_id, sh_id)
-
-        """
-        try:
-            # Create request xml
-            response_root = ET.Element("MESSAGE")
-            header = ET.SubElement(response_root, "HEADER")
-            ET.SubElement(header, "MESSAGENAME").text = message_name
-            ET.SubElement(header, "TRANSACTIONID").text = transaction_id
-            ET.SubElement(header, "REPLYSUBJECTNAME").text = ""
-            ET.SubElement(header, "INBOXNAME").text = ""
-            ET.SubElement(header, "LISTENER").text = ""
-
-            body = ET.SubElement(response_root, "BODY")
-            ET.SubElement(body, "TRX_ID").text = transaction_id
-            ET.SubElement(body, "StoreHouseID").text = str(sh_id)
-            ET.SubElement(body, "RecipeName").text = "P140-228-5"
-
-            recipe_info = ET.SubElement(body, "RecipeInfo")
-            recipe_step = ET.SubElement(recipe_info, "RecipeStep")
-            ET.SubElement(recipe_step, "Step").text = "1"
-            ET.SubElement(recipe_step, "Control_Mode").text = "START_CC"
-            ET.SubElement(recipe_step, "Cell_Max_Voltage").text = "4.18"
-            ET.SubElement(recipe_step, "Cell_Min_Voltage").text = "0"
-            ET.SubElement(recipe_step, "Cell_Delta_Voltage").text = "300"
-            ET.SubElement(recipe_step, "Cell_Delta_Voltage_Delay").text = "5"
-            ET.SubElement(recipe_step, "Cell_Max_Current").text = "25"
-            ET.SubElement(recipe_step, "Cell_Min_Current").text = "-1.5"
-            ET.SubElement(recipe_step, "Cell_Protect_Temp").text = "45"
-            ET.SubElement(recipe_step, "Cell_Delta_Temp").text = "3.2"
-            ET.SubElement(recipe_step, "Cell_Delta_Temp_Time").text = "4"
-            ET.SubElement(recipe_step, "Cell_Delta_Wire_Voltage").text = "1500"
-            ET.SubElement(recipe_step, "Cell_Delta_Wire_Voltage_Time").text = "4"
-            ET.SubElement(recipe_step, "Cell_Protect_Delay_Time").text = "60"
-            ET.SubElement(recipe_step, "Cell_Setting_Time").text = "12600"
-            ET.SubElement(recipe_step, "Wire_Max_Voltage").text = "1.5"
-            ET.SubElement(recipe_step, "Cell_Delta_Wire_Delay").text = "1"
-            ET.SubElement(recipe_step, "Cell_Delta_Temp_Delay").text = "1"
-            ET.SubElement(recipe_step, "Cell_Protect_Temp_Water").text = "90.1"
-            ET.SubElement(recipe_step, "Cell_Delta_Temp_Frame").text = "3"
-
-            recipe_step = ET.SubElement(recipe_info, "RecipeStep")
-            ET.SubElement(recipe_step, "Step").text = "2"
-            ET.SubElement(recipe_step, "Control_Mode").text = "REST"
-            ET.SubElement(recipe_step, "Cell_Max_Voltage").text = "4.18"
-            ET.SubElement(recipe_step, "Cell_Min_Voltage").text = "0"
-            ET.SubElement(recipe_step, "Cell_Delta_Voltage").text = "300"
-            ET.SubElement(recipe_step, "Cell_Delta_Voltage_Delay").text = "5"
-            ET.SubElement(recipe_step, "Cell_Max_Current").text = "25"
-            ET.SubElement(recipe_step, "Cell_Min_Current").text = "-1.5"
-            ET.SubElement(recipe_step, "Cell_Protect_Temp").text = "45"
-            ET.SubElement(recipe_step, "Cell_Delta_Temp").text = "3.2"
-            ET.SubElement(recipe_step, "Cell_Delta_Temp_Time").text = "4"
-            ET.SubElement(recipe_step, "Cell_Delta_Wire_Voltage").text = "1500"
-            ET.SubElement(recipe_step, "Cell_Delta_Wire_Voltage_Time").text = "4"
-            ET.SubElement(recipe_step, "Cell_Protect_Delay_Time").text = "60"
-            ET.SubElement(recipe_step, "Cell_Setting_Time").text = "12600"
-            ET.SubElement(recipe_step, "Wire_Max_Voltage").text = "1.5"
-            ET.SubElement(recipe_step, "Cell_Delta_Wire_Delay").text = "1"
-            ET.SubElement(recipe_step, "Cell_Delta_Temp_Delay").text = "1"
-            ET.SubElement(recipe_step, "Cell_Protect_Temp_Water").text = "90.1"
-            ET.SubElement(recipe_step, "Cell_Delta_Temp_Frame").text = "3"
-
-            recipe_step = ET.SubElement(recipe_info, "RecipeStep")
-            ET.SubElement(recipe_step, "Step").text = "3"
-            ET.SubElement(recipe_step, "Control_Mode").text = "END"
-            ET.SubElement(recipe_step, "Cell_Max_Voltage").text = "4.18"
-            ET.SubElement(recipe_step, "Cell_Min_Voltage").text = "0"
-            ET.SubElement(recipe_step, "Cell_Delta_Voltage").text = "300"
-            ET.SubElement(recipe_step, "Cell_Delta_Voltage_Delay").text = "5"
-            ET.SubElement(recipe_step, "Cell_Max_Current").text = "25"
-            ET.SubElement(recipe_step, "Cell_Min_Current").text = "-1.5"
-            ET.SubElement(recipe_step, "Cell_Protect_Temp").text = "45"
-            ET.SubElement(recipe_step, "Cell_Delta_Temp").text = "3.2"
-            ET.SubElement(recipe_step, "Cell_Delta_Temp_Time").text = "4"
-            ET.SubElement(recipe_step, "Cell_Delta_Wire_Voltage").text = "1500"
-            ET.SubElement(recipe_step, "Cell_Delta_Wire_Voltage_Time").text = "4"
-            ET.SubElement(recipe_step, "Cell_Protect_Delay_Time").text = "60"
-            ET.SubElement(recipe_step, "Cell_Setting_Time").text = "12600"
-            ET.SubElement(recipe_step, "Wire_Max_Voltage").text = "1.5"
-            ET.SubElement(recipe_step, "Cell_Delta_Wire_Delay").text = "1"
-            ET.SubElement(recipe_step, "Cell_Delta_Temp_Delay").text = "1"
-            ET.SubElement(recipe_step, "Cell_Protect_Temp_Water").text = "90.1"
-            ET.SubElement(recipe_step, "Cell_Delta_Temp_Frame").text = "3"
 
             pallet_info = ET.SubElement(body, "PalletInfo")
             pallet = ET.SubElement(pallet_info, "Pallet")
@@ -571,7 +399,205 @@ class XMLSocketServer:
         except Exception:
             self.logging.error(f"create_reply_w1001_xml failed\n{self.logger.get_slim_error_log()}")
 
-    def create_request_w2003_xml(self, message_name, transaction_id, sh_id, step):
+    def create_request_w2002_xml(self, message_name, transaction_id, trx_id, sh_id):
+        """Generates an xml request of w2002 command
+
+        Args:
+            message_name: Message name
+            transaction_id: Transaction id
+            sh_id: Store house id
+
+        Returns:
+            Xml request
+
+        Example:
+            >>> xml_socket_svr_obj = XMLSocketServer()
+            >>> xml_socket_svr_obj.create_request_w2002_xml(message_name, transaction_id, sh_id)
+
+        """
+        try:
+            # Create request xml
+            response_root = ET.Element("MESSAGE")
+            header = ET.SubElement(response_root, "HEADER")
+            ET.SubElement(header, "MESSAGENAME").text = message_name
+            ET.SubElement(header, "TRANSACTIONID").text = transaction_id
+            ET.SubElement(header, "REPLYSUBJECTNAME").text = ""
+            ET.SubElement(header, "INBOXNAME").text = ""
+            ET.SubElement(header, "LISTENER").text = ""
+
+            body = ET.SubElement(response_root, "BODY")
+            ET.SubElement(body, "TRX_ID").text = trx_id
+            ET.SubElement(body, "StoreHouseID").text = str(sh_id)
+            ET.SubElement(body, "RecipeName").text = "P140-228-5"
+
+            recipe_info = ET.SubElement(body, "RecipeInfo")
+            recipe_step = ET.SubElement(recipe_info, "RecipeStep")
+            ET.SubElement(recipe_step, "Step").text = "1"
+            ET.SubElement(recipe_step, "Control_Mode").text = "START_CC"
+            ET.SubElement(recipe_step, "Cell_Max_Voltage").text = "4.18"
+            ET.SubElement(recipe_step, "Cell_Min_Voltage").text = "0"
+            ET.SubElement(recipe_step, "Cell_Delta_Voltage").text = "300"
+            ET.SubElement(recipe_step, "Cell_Delta_Voltage_Time").text = "5"
+            ET.SubElement(recipe_step, "Cell_Max_Current").text = "25"
+            ET.SubElement(recipe_step, "Cell_Min_Current").text = "-1.5"
+            ET.SubElement(recipe_step, "Cell_Protect_Temp").text = "45"
+            ET.SubElement(recipe_step, "Cell_Delta_Temp").text = "3.2"
+            ET.SubElement(recipe_step, "Cell_Delta_Temp_Time").text = "4"
+            ET.SubElement(recipe_step, "Cell_Delta_Wire_Voltage").text = "1500"
+            ET.SubElement(recipe_step, "Cell_Delta_Wire_Voltage_Time").text = "4"
+            ET.SubElement(recipe_step, "Cell_Protect_Delay_Time").text = "60"
+            ET.SubElement(recipe_step, "Cell_Setting_Time").text = "210"
+            ET.SubElement(recipe_step, "Wire_Max_Voltage").text = "1.5"
+            ET.SubElement(recipe_step, "Cell_Delta_Wire_Delay").text = "1"
+            ET.SubElement(recipe_step, "Cell_Delta_Temp_Delay").text = "1"
+            ET.SubElement(recipe_step, "Cell_Protect_Temp_Water").text = "90.1"
+            # ET.SubElement(recipe_step, "Cell_Delta_Temp_Frame").text = "3"
+
+            xml_hook = os.environ.get(
+                "CCS_XML_HOOK"
+            )
+            if(xml_hook is None or xml_hook=="5"):
+                ET.SubElement(recipe_step, "Cell_Delta_Temp_Frame").text = "3"  #normal case
+            elif(xml_hook=="1"):
+                ET.SubElement(recipe_step, "cell_Delta_Temp_Frame").text = "3"  # Key case mismatch
+            elif(xml_hook=="2"):
+                ET.SubElement(recipe_step, "Cell_Delta_Temp_Frame").text = "aa" #Invalid recipe parameter value
+            elif(xml_hook=="3"):
+                ET.SubElement(recipe_step, "").text = "3"   #Parsing XML error
+
+            recipe_step = ET.SubElement(recipe_info, "RecipeStep")
+            ET.SubElement(recipe_step, "Step").text = "2"
+            ET.SubElement(recipe_step, "Control_Mode").text = "REST"
+            ET.SubElement(recipe_step, "Cell_Max_Voltage").text = "4.18"
+            ET.SubElement(recipe_step, "Cell_Min_Voltage").text = "0"
+            ET.SubElement(recipe_step, "Cell_Delta_Voltage").text = "300"
+            ET.SubElement(recipe_step, "Cell_Delta_Voltage_Time").text = "5"
+            ET.SubElement(recipe_step, "Cell_Max_Current").text = "25"
+            ET.SubElement(recipe_step, "Cell_Min_Current").text = "-1.5"
+            ET.SubElement(recipe_step, "Cell_Protect_Temp").text = "45"
+            ET.SubElement(recipe_step, "Cell_Delta_Temp").text = "3.2"
+            ET.SubElement(recipe_step, "Cell_Delta_Temp_Time").text = "4"
+            ET.SubElement(recipe_step, "Cell_Delta_Wire_Voltage").text = "1500"
+            ET.SubElement(recipe_step, "Cell_Delta_Wire_Voltage_Time").text = "4"
+            ET.SubElement(recipe_step, "Cell_Protect_Delay_Time").text = "60"
+            ET.SubElement(recipe_step, "Cell_Setting_Time").text = "210"
+            ET.SubElement(recipe_step, "Wire_Max_Voltage").text = "1.5"
+            ET.SubElement(recipe_step, "Cell_Delta_Wire_Delay").text = "1"
+            ET.SubElement(recipe_step, "Cell_Delta_Temp_Delay").text = "1"
+            ET.SubElement(recipe_step, "Cell_Protect_Temp_Water").text = "90.1"
+            ET.SubElement(recipe_step, "Cell_Delta_Temp_Frame").text = "3"
+
+            recipe_step = ET.SubElement(recipe_info, "RecipeStep")
+            ET.SubElement(recipe_step, "Step").text = "3"
+            ET.SubElement(recipe_step, "Control_Mode").text = "END"
+            ET.SubElement(recipe_step, "Cell_Max_Voltage").text = "4.18"
+            ET.SubElement(recipe_step, "Cell_Min_Voltage").text = "0"
+            ET.SubElement(recipe_step, "Cell_Delta_Voltage").text = "300"
+            ET.SubElement(recipe_step, "Cell_Delta_Voltage_Time").text = "5"
+            ET.SubElement(recipe_step, "Cell_Max_Current").text = "25"
+            ET.SubElement(recipe_step, "Cell_Min_Current").text = "-1.5"
+            ET.SubElement(recipe_step, "Cell_Protect_Temp").text = "45"
+            ET.SubElement(recipe_step, "Cell_Delta_Temp").text = "3.2"
+            ET.SubElement(recipe_step, "Cell_Delta_Temp_Time").text = "4"
+            ET.SubElement(recipe_step, "Cell_Delta_Wire_Voltage").text = "1500"
+            ET.SubElement(recipe_step, "Cell_Delta_Wire_Voltage_Time").text = "4"
+            ET.SubElement(recipe_step, "Cell_Protect_Delay_Time").text = "60"
+            ET.SubElement(recipe_step, "Cell_Setting_Time").text = "210"
+            ET.SubElement(recipe_step, "Wire_Max_Voltage").text = "1.5"
+            ET.SubElement(recipe_step, "Cell_Delta_Wire_Delay").text = "1"
+            ET.SubElement(recipe_step, "Cell_Delta_Temp_Delay").text = "1"
+            ET.SubElement(recipe_step, "Cell_Protect_Temp_Water").text = "90.1"
+            ET.SubElement(recipe_step, "Cell_Delta_Temp_Frame").text = "3"
+
+            pallet_info = ET.SubElement(body, "PalletInfo")
+            pallet = ET.SubElement(pallet_info, "Pallet")
+            ET.SubElement(pallet, "PalletID").text = self.meas_map[(self.meas_map["StoreHouseID"] == sh_id) & (self.meas_map["PalletPosition"] == "L")].iloc[0]["PalletID"]
+
+            if(xml_hook=="5"):
+                ET.SubElement(pallet, "SerialBoardID").text = "C00169"
+            else:
+                ET.SubElement(pallet, "SerialBoardID").text = self.meas_map[(self.meas_map["StoreHouseID"] == sh_id) & (self.meas_map["PalletPosition"] == "L")].iloc[0]["SerialBoardID"]
+            ET.SubElement(pallet, "DRCID").text = self.meas_map[(self.meas_map["StoreHouseID"] == sh_id) & (self.meas_map["PalletPosition"] == "L")].iloc[0]["ProtectBoardID"]
+            ET.SubElement(pallet, "PalletPosition").text = "L"
+            qrcode_list = ET.SubElement(pallet, "QRCodeList")
+            qrcode = ET.SubElement(qrcode_list, "QRCode")
+            ET.SubElement(qrcode, "Position").text = "1"
+            ET.SubElement(qrcode, "QRCODEID").text = self.meas_map[(self.meas_map["StoreHouseID"] == sh_id) & (self.meas_map["PalletPosition"] == "L") & (self.meas_map["Position"] == 1)].iloc[0][
+                "QRCODEID"
+            ]
+            qrcode = ET.SubElement(qrcode_list, "QRCode")
+            ET.SubElement(qrcode, "Position").text = "2"
+            ET.SubElement(qrcode, "QRCODEID").text = self.meas_map[(self.meas_map["StoreHouseID"] == sh_id) & (self.meas_map["PalletPosition"] == "L") & (self.meas_map["Position"] == 2)].iloc[0][
+                "QRCODEID"
+            ]
+            qrcode = ET.SubElement(qrcode_list, "QRCode")
+            ET.SubElement(qrcode, "Position").text = "3"
+            ET.SubElement(qrcode, "QRCODEID").text = self.meas_map[(self.meas_map["StoreHouseID"] == sh_id) & (self.meas_map["PalletPosition"] == "L") & (self.meas_map["Position"] == 3)].iloc[0][
+                "QRCODEID"
+            ]
+            qrcode = ET.SubElement(qrcode_list, "QRCode")
+            ET.SubElement(qrcode, "Position").text = "4"
+            ET.SubElement(qrcode, "QRCODEID").text = self.meas_map[(self.meas_map["StoreHouseID"] == sh_id) & (self.meas_map["PalletPosition"] == "L") & (self.meas_map["Position"] == 4)].iloc[0][
+                "QRCODEID"
+            ]
+            qrcode = ET.SubElement(qrcode_list, "QRCode")
+            ET.SubElement(qrcode, "Position").text = "5"
+            ET.SubElement(qrcode, "QRCODEID").text = self.meas_map[(self.meas_map["StoreHouseID"] == sh_id) & (self.meas_map["PalletPosition"] == "L") & (self.meas_map["Position"] == 5)].iloc[0][
+                "QRCODEID"
+            ]
+            qrcode = ET.SubElement(qrcode_list, "QRCode")
+            ET.SubElement(qrcode, "Position").text = "6"
+            ET.SubElement(qrcode, "QRCODEID").text = self.meas_map[(self.meas_map["StoreHouseID"] == sh_id) & (self.meas_map["PalletPosition"] == "L") & (self.meas_map["Position"] == 6)].iloc[0][
+                "QRCODEID"
+            ]
+
+            pallet = ET.SubElement(pallet_info, "Pallet")
+            ET.SubElement(pallet, "PalletID").text = self.meas_map[(self.meas_map["StoreHouseID"] == sh_id) & (self.meas_map["PalletPosition"] == "R")].iloc[0]["PalletID"]
+            ET.SubElement(pallet, "SerialBoardID").text = self.meas_map[(self.meas_map["StoreHouseID"] == sh_id) & (self.meas_map["PalletPosition"] == "R")].iloc[0]["SerialBoardID"]
+            ET.SubElement(pallet, "DRCID").text = self.meas_map[(self.meas_map["StoreHouseID"] == sh_id) & (self.meas_map["PalletPosition"] == "R")].iloc[0]["ProtectBoardID"]
+            ET.SubElement(pallet, "PalletPosition").text = "R"
+
+            qrcode_list = ET.SubElement(pallet, "QRCodeList")
+            qrcode = ET.SubElement(qrcode_list, "QRCode")
+            ET.SubElement(qrcode, "Position").text = "1"
+            ET.SubElement(qrcode, "QRCODEID").text = self.meas_map[(self.meas_map["StoreHouseID"] == sh_id) & (self.meas_map["PalletPosition"] == "R") & (self.meas_map["Position"] == 1)].iloc[0][
+                "QRCODEID"
+            ]
+            qrcode = ET.SubElement(qrcode_list, "QRCode")
+            ET.SubElement(qrcode, "Position").text = "2"
+            ET.SubElement(qrcode, "QRCODEID").text = self.meas_map[(self.meas_map["StoreHouseID"] == sh_id) & (self.meas_map["PalletPosition"] == "R") & (self.meas_map["Position"] == 2)].iloc[0][
+                "QRCODEID"
+            ]
+            qrcode = ET.SubElement(qrcode_list, "QRCode")
+            ET.SubElement(qrcode, "Position").text = "3"
+            ET.SubElement(qrcode, "QRCODEID").text = self.meas_map[(self.meas_map["StoreHouseID"] == sh_id) & (self.meas_map["PalletPosition"] == "R") & (self.meas_map["Position"] == 3)].iloc[0][
+                "QRCODEID"
+            ]
+            qrcode = ET.SubElement(qrcode_list, "QRCode")
+            ET.SubElement(qrcode, "Position").text = "4"
+            ET.SubElement(qrcode, "QRCODEID").text = self.meas_map[(self.meas_map["StoreHouseID"] == sh_id) & (self.meas_map["PalletPosition"] == "R") & (self.meas_map["Position"] == 4)].iloc[0][
+                "QRCODEID"
+            ]
+            qrcode = ET.SubElement(qrcode_list, "QRCode")
+            ET.SubElement(qrcode, "Position").text = "5"
+            ET.SubElement(qrcode, "QRCODEID").text = self.meas_map[(self.meas_map["StoreHouseID"] == sh_id) & (self.meas_map["PalletPosition"] == "R") & (self.meas_map["Position"] == 5)].iloc[0][
+                "QRCODEID"
+            ]
+            qrcode = ET.SubElement(qrcode_list, "QRCode")
+            ET.SubElement(qrcode, "Position").text = "6"
+            ET.SubElement(qrcode, "QRCODEID").text = self.meas_map[(self.meas_map["StoreHouseID"] == sh_id) & (self.meas_map["PalletPosition"] == "R") & (self.meas_map["Position"] == 6)].iloc[0][
+                "QRCODEID"
+            ]
+
+            ret = ET.SubElement(response_root, "RETURN")
+            ET.SubElement(ret, "RETURNCODE").text = "0"
+            ET.SubElement(ret, "RETURNMESSAGE").text = ""
+
+            return ET.tostring(response_root, encoding="utf-8", short_empty_elements=False)
+        except Exception:
+            self.logging.error(f"create_reply_w1001_xml failed\n{self.logger.get_slim_error_log()}")
+
+    def create_request_w2003_xml(self, message_name, transaction_id, trx_id, sh_id, step):
         """Generates an xml request of w2003 command
 
         Args:
@@ -599,7 +625,7 @@ class XMLSocketServer:
             ET.SubElement(header, "LISTENER").text = ""
 
             body = ET.SubElement(response_root, "BODY")
-            ET.SubElement(body, "TRX_ID").text = transaction_id
+            ET.SubElement(body, "TRX_ID").text = trx_id
             ET.SubElement(body, "StoreHouseID").text = str(sh_id)
             ET.SubElement(body, "STEP").text = str(step)
 
@@ -611,7 +637,7 @@ class XMLSocketServer:
         except Exception:
             self.logging.error(f"create_request_w2003_xml failed\n{self.logger.get_slim_error_log()}")
 
-    def create_request_w2004_xml(self, message_name, transaction_id, sh_id):
+    def create_request_w2004_xml(self, message_name, transaction_id, trx_id, sh_id):
         """Generates an xml request of w2004 command
 
         Args:
@@ -638,7 +664,7 @@ class XMLSocketServer:
             ET.SubElement(header, "LISTENER").text = ""
 
             body = ET.SubElement(response_root, "BODY")
-            ET.SubElement(body, "TRX_ID").text = transaction_id
+            ET.SubElement(body, "TRX_ID").text = trx_id
             ET.SubElement(body, "LINE_ID").text = "SECCHARGE0100"
             ET.SubElement(body, "StoreHouseID").text = str(sh_id)
 
@@ -650,7 +676,7 @@ class XMLSocketServer:
         except Exception:
             self.logging.error(f"create_request_w2004_xml failed\n{self.logger.get_slim_error_log()}")
 
-    def create_request_w2005_xml(self, message_name, transaction_id, sh_id):
+    def create_request_w2005_xml(self, message_name, transaction_id, trx_id, sh_id):
         """Generates an xml request of w2005 command
 
         Args:
@@ -677,7 +703,7 @@ class XMLSocketServer:
             ET.SubElement(header, "LISTENER").text = ""
 
             body = ET.SubElement(response_root, "BODY")
-            ET.SubElement(body, "TRX_ID").text = transaction_id
+            ET.SubElement(body, "TRX_ID").text = trx_id
             ET.SubElement(body, "LINE_ID").text = "SECCHARGE0100"
             ET.SubElement(body, "StoreHouseID").text = str(sh_id)
 
@@ -729,31 +755,64 @@ class XMLSocketServer:
                         with open(r"artifacts\last_alarm.xml", "w", encoding="utf-8") as f:
                             f.write(xml_string)
 
+                    if self.enable_artifact_alive_hook and message_name.startswith("Alive"):
+                        with open(r"artifacts\alive_request.xml", "a", encoding="utf-8") as f:
+                            f.write("\n<!-- REPLY_BEGIN -->\n")
+                            f.write(xml_string)
+                            f.write("\n<!-- REPLY_END -->\n")
+
+                    if self.enable_artifact_sync_hook and message_name.startswith("Sync"):
+                        with open(r"artifacts\last_sync.xml", "w", encoding="utf-8") as f:
+                            f.write(xml_string)
+
             except Exception:
                 pass
             # ===== [HOOK END] =====
 
             rsp_message = root.find("./HEADER/MESSAGENAME").text.replace("Request", "Reply")
             transaction_id = root.find("./HEADER/TRANSACTIONID").text
+            trx_id = root.find("./BODY/TRX_ID").text
             # storehouse_id = root.findtext(".//StoreHouseID")
             # if storehouse_id:
             #     self.logging.info(f"{message_name} | shid: {storehouse_id}")
 
             # self.logging.debug(f"{minidom.parseString(xml_string).toprettyxml(indent='    ')}")  # noqa: S318
-            code_map = {
-                        0: "OK",
-                        1: "NG",
-                        2: "Water",
-                        3: "NoResponse",
-                    }
             storehouse_id = root.findtext("./BODY/StoreHouseID")
             return_code = root.findtext("./RETURN/RETURNCODE")
+            return_msg = root.findtext("./RETURN/RETURNMESSAGE")
+            code_map = {
+                0: "OK",
+                1: "NG",
+                2: "Water",
+                3: "NoResponse"
+            }
             return_code = (
                 code_map.get(int(return_code), "Unknown")
                 if return_code and return_code.strip()
                 else None
             )
-            self.logging.debug(f"{message_name} | {return_code} | {storehouse_id}")            
+            reply_map = {
+                "SyncTimeRequest": "[Recv] W0001Req",
+                "SyncTimeReply": "[Send] W0001Rsp",
+                "AliveRequest": "[Recv] W0002Req",
+                "AliveReply": "[Send] W0002Rsp",
+                "AlarmStopReport": "[Recv] W1001Rsp",
+                "StoreHouseStatusRequest": "[Send] W2002Req",
+                "StoreHouseStatusReply": "[Recv] W2002Rsp",
+                "StoreHouseStepCheckRequest": "[Send] W2003Req",
+                "StoreHouseStepCheckReply": "[Recv] W2003Rsp",
+                "StoreHouseNGCheckRequest": "[Send] W2004Req",
+                "StoreHouseNGCheckReply": "[Recv] W2004Rsp",
+                "JudgmentCompletionNotificationRequest": "[Send] W2005Req",
+                "JudgmentCompletionNotificationReply": "[Recv] W2005Rsp"
+            }
+            msg_code = (
+                reply_map.get(message_name, "Unknown")
+                if message_name and message_name.strip()
+                else None
+            )
+            self.logging.debug(f"{msg_code} | {return_code} | {storehouse_id} | {transaction_id[-6:]} | {trx_id[-6:]} | {return_msg}")
+            
             request_xml = b""
             # Create and send reply
             if message_name == "SyncTimeRequest":
@@ -828,6 +887,7 @@ class XMLSocketServer:
                             self.cmd_start_idx = int(inputs[1])
                             self.cmd_end_idx = int(inputs[2])
                             self.cmd_step = int(inputs[3])
+                            self.influxdb_obj.write_ccs_logs_influxdb("DEBUG", f"CCS {self.cmd} {self.cmd_start_idx} {self.cmd_end_idx} {self.cmd_step}", "system")
                         except ValueError:
                             self.logging.info(
                                 """Usage:
@@ -1166,28 +1226,6 @@ class XMLSocketServer:
         except Exception:
             self.logging.error(f"check_task_status failed\n{self.logger.get_slim_error_log()}")
 
-    
-    def debug_query_latest_board_status_flux(
-        self,
-        serialboard_id: str,
-        field_name: str,
-        measurement: str | None = None,
-        lookback_sec: int = 30,
-        exclude_qrcode_curr: bool = True,
-    ):    
-        
-        """
-        Debug wrapper:
-        保留舊的 debug function 名稱，但實際查詢改走正式版 query_latest_board_status_flux。
-        """
-        return self.query_latest_board_status_flux(
-            serialboard_id=serialboard_id,
-            field_name=field_name,
-            measurement=measurement,
-            lookback_sec=lookback_sec,
-            exclude_qrcode_curr=exclude_qrcode_curr,
-        )
-
     def query_latest_board_status_flux(
         self,
         protectboard_id: str,
@@ -1206,10 +1244,7 @@ class XMLSocketServer:
         try:
             import pandas as pd
 
-            meas = measurement or self.get_current_measurement_name(
-                prefix="data",
-                use_utc=False,
-            )
+            meas = measurement or self.get_current_measurement_name(prefix="data", use_utc=False,)
 
             qrcode_filter = (
                 '  |> filter(fn: (r) => r["qrcode"] != "curr")\n'
@@ -1280,88 +1315,15 @@ class XMLSocketServer:
                 f"{self.logger.get_slim_error_log()}"
             )
             return None
-
-        
-
-    def query_latest_board_status(
-        self,
-        measurement: str,
-        serialboard_id: str,
-        fields: list[str],
-        lookback_sec: int = 86400,
-    ):
-        """
-        正式流程用：查指定 serialboard_id 最近一段時間的最後一筆資料
-        """
-        try:
-            import pandas as pd
-            from datetime import datetime, timedelta, timezone
-
-            end_dt = datetime.now(timezone.utc)
-            start_dt = end_dt - timedelta(seconds=lookback_sec)
-
-            start_time = start_dt.isoformat().replace("+00:00", "Z")
-            end_time = end_dt.isoformat().replace("+00:00", "Z")
-
-            df = self.influxdb_obj.read_pd_influxdb(
-                start_time=start_time,
-                end_time=end_time,
-                bucket=self.influxdb_obj.bucket,
-                meas=measurement,
-                fields=fields,
-            )
-
-            if isinstance(df, list):
-                df = pd.concat(
-                    [x for x in df if isinstance(x, pd.DataFrame) and not x.empty],
-                    ignore_index=True,
-                ) if df else pd.DataFrame()
-
-            if not isinstance(df, pd.DataFrame) or df.empty:
-                return None
-
-            drop_cols = [c for c in ["result", "table"] if c in df.columns]
-            if drop_cols:
-                df = df.drop(columns=drop_cols)
-
-            if "_time" in df.columns and "datetime" not in df.columns:
-                df["datetime"] = pd.to_datetime(df["_time"], errors="coerce")
-            elif "datetime" in df.columns:
-                df["datetime"] = pd.to_datetime(df["datetime"], errors="coerce")
-
-            if "serialboard_id" not in df.columns:
-                return None
-
-            df["serialboard_id"] = df["serialboard_id"].astype(str)
-            df = df[df["serialboard_id"] == str(serialboard_id)]
-
-            if df.empty:
-                return None
-
-            sort_col = "datetime" if "datetime" in df.columns else "_time"
-            df = df.sort_values(sort_col)
-
-            latest = df.iloc[-1].to_dict()
-
-            if "datetime" in latest and pd.notna(latest["datetime"]):
-                latest["datetime"] = str(latest["datetime"])
-
-            return latest
-
-        except Exception:
-            self.logging.error(f"query_latest_board_status failed\n{self.logger.get_slim_error_log()}")
-            return None
-        
-
     
     def get_current_measurement_name(self, prefix: str = "data", use_utc: bool = False):
         """
         依目前日期產生 measurement 名稱，例如 data_20260616
         """
-        from datetime import datetime, timezone
+        # from datetime import datetime, timezone
 
-        now_dt = datetime.now(timezone.utc) if use_utc else datetime.now()
-        return f"{prefix}_{now_dt.strftime('%Y%m%d')}"
+        # now_dt = datetime.now(timezone.utc) if use_utc else datetime.now()
+        return "meas_data"
 
     def handle_autotest_script_demo(self):
         """Autotest script demo handler
@@ -1505,23 +1467,23 @@ class XMLSocketServer:
                     self.logging.info("w2002 1 84 0")
                     self.cmd = "w2002"
                     self.cmd_start_idx = 1
-                    self.cmd_end_idx = 84
+                    self.cmd_end_idx = 1
                     self.cmd_step = 0
-                    time.sleep(60)
+                    time.sleep(10)
 
                     self.influxdb_obj.write_log_influxdb("DEBUG", "CCS w2003 1 84 1", "system")
                     self.logging.info("w2003 1 84 1")
                     self.cmd = "w2003"
                     self.cmd_start_idx = 1
-                    self.cmd_end_idx = 84
+                    self.cmd_end_idx = 1
                     self.cmd_step = 1
-                    time.sleep(3600)
+                    time.sleep(300)
 
                     self.influxdb_obj.write_log_influxdb("DEBUG", "CCS w2003 1 84 2", "system")
                     self.logging.info("w2003 1 84 2")
                     self.cmd = "w2003"
                     self.cmd_start_idx = 1
-                    self.cmd_end_idx = 84
+                    self.cmd_end_idx = 1
                     self.cmd_step = 2
                     time.sleep(300)
 
@@ -1531,7 +1493,7 @@ class XMLSocketServer:
                     self.cmd_start_idx = 1
                     self.cmd_end_idx = 1
                     self.cmd_step = 3
-                    time.sleep(30)
+                    time.sleep(120)
                     round += 1
                     formatted_time = self.format_duration(time.time() - start_time)
                     self.influxdb_obj.write_log_influxdb("DEBUG", f"CCS Round {round} - {formatted_time}", "system")
@@ -1657,35 +1619,40 @@ class XMLSocketServer:
 
                                 # Send w2002 / w2003 / w2004 / w2005 xml message
                                 for sh_id in range(current_start_idx, current_end_idx + 1):
+                                    tid = self.generate_transaction_id()
+                                    trxid = self.generate_transaction_id()
                                     if current_cmd == "w2002":
                                         request_xml = self.create_request_w2002_xml(
                                             "StoreHouseStatusRequest",
-                                            self.generate_transaction_id(),
-                                            sh_id,
+                                            tid,
+                                            trxid,
+                                            sh_id
                                         )
+                                        self.logging.debug(f"[Send] W2002Req | None | {sh_id} | {tid[-6:]} | {trxid[-6:]}")
                                         notified_socket.sendall(struct.pack(">I", len(request_xml)) + request_xml)
                                     elif current_cmd == "w2003":
                                         request_xml = self.create_request_w2003_xml(
                                             "StoreHouseStepCheckRequest",
-                                            self.generate_transaction_id(),
+                                            tid,
+                                            trxid,
                                             sh_id,
-                                            current_step,
+                                            current_step
                                         )
+                                        self.logging.debug(f"[Send] W2003Req | None | {sh_id} |  {tid[-6:]} | {trxid[-6:]}")
                                         notified_socket.sendall(struct.pack(">I", len(request_xml)) + request_xml)
                                     elif current_cmd == "w2004":
                                         request_xml = self.create_request_w2004_xml(
                                             "StoreHouseNGCheckRequest",
-                                            self.generate_transaction_id(),
+                                            tid,
+                                            trxid,
                                             sh_id
                                         )
+                                        self.logging.debug(f"[Send] W2004Req | None | {sh_id} | {tid[-6:]} | {trxid[-6:]}")
                                         notified_socket.sendall(struct.pack(">I", len(request_xml)) + request_xml)
 
                                     elif current_cmd == "w2005":
-                                        request_xml = self.create_request_w2005_xml(
-                                            "JudgmentCompletionNotificationRequest",
-                                            self.generate_transaction_id(),
-                                            sh_id
-                                        )
+                                        request_xml = self.create_request_w2005_xml("JudgmentCompletionNotificationRequest", tid, trxid, sh_id)
+                                        self.logging.debug(f"[Send] W2005Req | None | {sh_id} | {tid[-6:]} | {trxid[-6:]}")
                                         notified_socket.sendall(struct.pack(">I", len(request_xml)) + request_xml)
 
                             except Exception:
@@ -1963,16 +1930,16 @@ class XMLSocketServer:
         return ranges
     
 
-    def rack_to_serialboard_ids(self, rack: int) -> list[str]:
-        """
-        rack 與 serialboard_id 的對應規則：
-        rack 1 -> A0001, A0002
-        rack 2 -> A0003, A0004
-        rack 3 -> A0005, A0006
-        ...
-        """
-        first_num = (rack - 1) * 2 + 1
-        return [f"A{first_num:04d}", f"A{first_num + 1:04d}"]
+    # def rack_to_serialboard_ids(self, rack: int) -> list[str]:
+    #     """
+    #     rack 與 serialboard_id 的對應規則：
+    #     rack 1 -> A0001, A0002
+    #     rack 2 -> A0003, A0004
+    #     rack 3 -> A0005, A0006
+    #     ...
+    #     """
+    #     first_num = (rack - 1) * 2 + 1
+    #     return [f"A{first_num:04d}", f"A{first_num + 1:04d}"]
 
     def rack_to_task_names(self, rack: int) -> list[str]:
         """
@@ -2042,11 +2009,6 @@ class XMLSocketServer:
                 for rack in racks:
                     self.rack_cooldown_until[rack] = cooldown_until
 
-            # self.logging.info(
-            #     f"[RACK-COOLDOWN] added racks={sorted(set(racks))}, "
-            #     f"cooldown_sec={cooldown_sec}"
-            # )
-
         except Exception:
             self.logging.error(
                 f"add_racks_to_cooldown failed\n"
@@ -2071,11 +2033,6 @@ class XMLSocketServer:
                     self.rack_cooldown_until.pop(rack, None)
 
                 active_cooldown_racks = set(self.rack_cooldown_until.keys())
-
-            # if expired_racks:
-            #     self.logging.info(
-            #         f"[RACK-COOLDOWN] expired racks released={sorted(expired_racks)}"
-            #     )
 
             return active_cooldown_racks
 
@@ -2474,6 +2431,7 @@ class XMLSocketServer:
 
                             if issue_result["ok"]:
                                 now_ts = time.monotonic()
+                                self.influxdb_obj.write_ccs_logs_influxdb("DEBUG", f"CCS w2002 {start_idx} {end_idx} 0", "system")
 
                                 # 建立 step1 pending，讓後續 w2003 step1 thread 接著處理
                                 with self.auto_state_lock:
@@ -2497,13 +2455,6 @@ class XMLSocketServer:
                                     f"reason={issue_result['reason']}"
                                 )
 
-                    # round_no += 1
-                    # formatted_time = self.format_duration(time.monotonic() - start_time)
-
-                    # self.logging.info(
-                    #     f"[TASK-POLL] round={round_no}, elapsed={formatted_time}, "
-                    # )
-
                 except Exception:
                     self.logging.error(
                         f"handle_poll_expected_task_ready_by_rack_count inner failed\n"
@@ -2525,10 +2476,10 @@ class XMLSocketServer:
         lookback_sec: int = 30,
         scan_interval_sec: int = 60,
         init_to_step1_delay_sec: int = 30,
-        issue_sleep_sec: int = 2,
+        issue_sleep_sec: float = 0.5,
         slot_timeout_sec: float = 10.0,
         slot_poll_sec: float = 0.05,
-        pending_expire_sec: int = 600,
+        pending_expire_sec: int | None = None,
         require_all_boards_ready: bool = False,
     ):
         """
@@ -2572,10 +2523,7 @@ class XMLSocketServer:
                     # start_time = time.monotonic()
 
                     # measurement 若未指定，則每輪依日期自動產生
-                    current_measurement = measurement or self.get_current_measurement_name(
-                        prefix="data",
-                        use_utc=False,
-                    )
+                    current_measurement = measurement or self.get_current_measurement_name(prefix="data", use_utc=False,)
 
                     due_racks = []
                     expired_racks = []
@@ -2662,6 +2610,7 @@ class XMLSocketServer:
                             )
 
                             if issue_result["ok"]:
+                                self.influxdb_obj.write_ccs_logs_influxdb("DEBUG", f"CCS w2003 {start_idx} {end_idx} 1","system")
                                 racks = list(range(start_idx, end_idx + 1))
                                 issued_racks.extend(racks)
 
@@ -2698,14 +2647,6 @@ class XMLSocketServer:
 
                         # pending_count_after_cleanup = len(self.auto_w2003_pending)
 
-                    # round_no += 1
-                    # formatted_time = self.format_duration(time.monotonic() - start_time)
-                    # self.logging.info(
-                    #     f"[AUTO-W2003-S1] round={round_no}, elapsed={formatted_time}, "
-                    # #     f"measurement={current_measurement} | "
-                    # #     f"pending={pending_count_after_cleanup}"
-                    # )
-
                 except Exception:
                     self.logging.error(
                         f"handle_autotest_w2003_after_init_and_active inner failed\n"
@@ -2725,13 +2666,13 @@ class XMLSocketServer:
         measurement: str | None = None,
         current_field: str = "current",
         current_threshold: float = 3.0,
-        lookback_sec: int = 30,
+        lookback_sec: int = 15,
         scan_interval_sec: int = 60,
         step1_to_step2_delay_sec: int = 30,
-        issue_sleep_sec: int = 2,
+        issue_sleep_sec: float = 0.5,
         slot_timeout_sec: float = 10.0,
         slot_poll_sec: float = 0.05,
-        pending_expire_sec: int = 600,
+        pending_expire_sec: int | None = None,
         require_all_boards_zero: bool = False,
     ):
         """
@@ -2767,10 +2708,7 @@ class XMLSocketServer:
                     now_ts = time.monotonic()
                     # start_time = time.monotonic()
 
-                    current_measurement = measurement or self.get_current_measurement_name(
-                        prefix="data",
-                        use_utc=False,
-                    )
+                    current_measurement = measurement or self.get_current_measurement_name(prefix="data", use_utc=False,)
 
                     due_racks = []
                     expired_racks = []
@@ -2815,7 +2753,6 @@ class XMLSocketServer:
                                 lookback_sec=lookback_sec,
                                 exclude_qrcode_curr=True,
                             )
-
 
                             ready = False
                             current_value = None
@@ -2862,6 +2799,7 @@ class XMLSocketServer:
                             )
 
                             if issue_result["ok"]:
+                                self.influxdb_obj.write_ccs_logs_influxdb("DEBUG", f"CCS w2003 {start_idx} {end_idx} 2", "system")
                                 racks = list(range(start_idx, end_idx + 1))
                                 issued_racks.extend(racks)
 
@@ -2895,14 +2833,6 @@ class XMLSocketServer:
 
                         # pending_count_after_cleanup = len(self.auto_w2003_step2_pending)
 
-                    # round_no += 1
-                    # formatted_time = self.format_duration(time.monotonic() - start_time)
-                    # self.logging.info(
-                    #     f"[AUTO-W2003-S2] round={round_no}, elapsed={formatted_time}, "
-                    # #     f"measurement={current_measurement} | "
-                    # #     f"pending={pending_count_after_cleanup}"
-                    # )
-
                 except Exception:
                     self.logging.error(
                         f"handle_autotest_w2003_step2_after_step1_current_below_threshold inner failed\n"
@@ -2922,10 +2852,10 @@ class XMLSocketServer:
         self,
         scan_interval_sec: int = 60,
         step2_to_step3_delay_sec: int = 120,
-        issue_sleep_sec: int = 2,
+        issue_sleep_sec: float = 0.5,
         slot_timeout_sec: float = 10.0,
         slot_poll_sec: float = 0.05,
-        pending_expire_sec: int = 600,
+        pending_expire_sec: int | None = None,
     ):
         """
         step3 自動流程（純時間版）：
@@ -2998,6 +2928,7 @@ class XMLSocketServer:
                             )
 
                             if issue_result["ok"]:
+                                self.influxdb_obj.write_ccs_logs_influxdb("DEBUG", f"CCS w2003 {start_idx} {end_idx} 3", "system")
                                 racks = list(range(start_idx, end_idx + 1))
                                 issued_racks.extend(racks)
 
@@ -3010,10 +2941,6 @@ class XMLSocketServer:
                         with self.auto_state_lock:
                             pending_count = len(self.auto_w2003_step3_pending)
 
-                        # self.logging.info(
-                        #     f"[AUTO-W2003-S3] no due rack yet | pending={pending_count}"
-                        # )
-
                     with self.auto_state_lock:
                         done_racks = [
                             rack for rack, state in self.auto_w2003_step3_pending.items()
@@ -3023,13 +2950,6 @@ class XMLSocketServer:
                             self.auto_w2003_step3_pending.pop(rack, None)
 
                         pending_count_after_cleanup = len(self.auto_w2003_step3_pending)
-
-                    # round_no += 1
-                    # formatted_time = self.format_duration(time.monotonic() - start_time)
-                    # self.logging.info(
-                    #     f"[AUTO-W2003-S3] round={round_no}, elapsed={formatted_time}, "
-                    # #     f"pending={pending_count_after_cleanup}"
-                    # )
 
                 except Exception:
                     self.logging.error(
@@ -3146,7 +3066,45 @@ if __name__ == "__main__":
             #     )
             #     task_poll_thread.start()
 
-            # 2. auto w2002 loop：只做 missing port -> w2002
+            # if os.environ.get("CCMS_AUTO_W2003_STEP1", "0") == "1":
+            #     auto_w2003_step1_thread = threading.Thread(
+            #         target=server.handle_autotest_w2003_after_init_and_active,
+            #         kwargs={
+            #             "voltage_field": os.environ.get("CCMS_AUTO_W2003_STEP1_VOLTAGE_FIELD", "voltage"),
+            #             "lookback_sec": int(os.environ.get("CCMS_AUTO_W2003_STEP1_LOOKBACK_SEC", "15")),
+            #             "scan_interval_sec": int(os.environ.get("CCMS_AUTO_W2003_STEP1_SCAN_INTERVAL_SEC", "60")),
+            #             "init_to_step1_delay_sec": int(os.environ.get("CCMS_AUTO_W2003_STEP1_DELAY_SEC", "30")),
+            #             "require_all_boards_ready": os.environ.get("CCMS_AUTO_W2003_STEP1_REQUIRE_ALL_BOARDS_READY", "0",) == "1",
+            #         },
+            #         daemon=True,
+            #     )
+            #     auto_w2003_step1_thread.start()
+
+            # if os.environ.get("CCMS_AUTO_W2003_STEP2", "0") == "1":
+            #     auto_w2003_step2_thread = threading.Thread(
+            #         target=server.handle_autotest_w2003_step2_after_step1_current_below_threshold,
+            #         kwargs={
+            #             "current_field": os.environ.get("CCMS_AUTO_W2003_STEP2_CURRENT_FIELD", "current"),
+            #             "current_threshold": float(os.environ.get("CCMS_AUTO_W2003_STEP2_CURRENT_THRESHOLD", "3.0")),
+            #             "lookback_sec": int(os.environ.get("CCMS_AUTO_W2003_STEP2_LOOKBACK_SEC", "15")),
+            #             "scan_interval_sec": int(os.environ.get("CCMS_AUTO_W2003_STEP2_SCAN_INTERVAL_SEC", "60")),
+            #             "step1_to_step2_delay_sec": int(os.environ.get("CCMS_AUTO_W2003_STEP2_DELAY_SEC", "60")),
+            #             "require_all_boards_zero": os.environ.get("CCMS_AUTO_W2003_STEP2_REQUIRE_ALL_BOARDS_ZERO", "0",) == "1",
+            #         },
+            #         daemon=True,
+            #     )
+            #     auto_w2003_step2_thread.start()
+
+            # if os.environ.get("CCMS_AUTO_W2003_STEP3", "0") == "1":
+            #     auto_w2003_step3_thread = threading.Thread(
+            #         target=server.handle_autotest_w2003_step3_after_step2_delay,
+            #         kwargs={
+            #             "scan_interval_sec": int(os.environ.get("CCMS_AUTO_W2003_STEP3_SCAN_INTERVAL_SEC", "60")),
+            #             "step2_to_step3_delay_sec": int(os.environ.get("CCMS_AUTO_W2003_STEP3_DELAY_SEC", "60",)),
+            #         },
+            #         daemon=True,
+            #     )
+            #     auto_w2003_step3_thread.start()
 
             task_poll_thread = threading.Thread(
                 target=server.handle_poll_expected_task_ready_by_rack_count,

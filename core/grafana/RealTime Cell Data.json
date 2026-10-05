@@ -1,4 +1,22 @@
 ﻿{
+    "__inputs":  [
+                     {
+                         "name":  "DS_INFLUXDB",
+                         "label":  "InfluxDB",
+                         "description":  "",
+                         "type":  "datasource",
+                         "pluginId":  "influxdb",
+                         "pluginName":  "InfluxDB"
+                     },
+                     {
+                         "name":  "DS_MSSQL",
+                         "label":  "MSSQL",
+                         "description":  "",
+                         "type":  "datasource",
+                         "pluginId":  "mssql",
+                         "pluginName":  "Microsoft SQL Server"
+                     }
+                 ],
     "annotations":  {
                         "list":  [
                                      {
@@ -40,6 +58,7 @@
                                                                            "axisColorMode":  "text",
                                                                            "axisLabel":  "",
                                                                            "axisPlacement":  "auto",
+                                                                           "axisSoftMax":  -1,
                                                                            "barAlignment":  0,
                                                                            "barWidthFactor":  0.6,
                                                                            "drawStyle":  "line",
@@ -71,6 +90,8 @@
                                                             "mappings":  [
 
                                                                          ],
+                                                            "max":  99,
+                                                            "min":  999,
                                                             "thresholds":  {
                                                                                "mode":  "absolute",
                                                                                "steps":  [
@@ -119,7 +140,7 @@
                                                               "uid":  "${DS_INFLUXDB}"
                                                           },
                                            "hide":  false,
-                                           "query":  "from(bucket: \"${bucket}\")\r\n  |\u003e range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |\u003e filter(fn: (r) =\u003e r[\"_measurement\"] == \"${meas}\")\r\n  |\u003e filter(fn: (r) =\u003e ${select_export_data_list})\r\n  |\u003e filter(fn: (r) =\u003e r[\"storehouse_id\"] == \"${rack_id}\")\r\n  |\u003e filter(fn: (r) =\u003e ${qrcode})\r\n  |\u003e keep(columns: [\"_time\", \"_field\", \"_value\", \"qrcode\", \"storehouse_id\", \"serialboard_id\", \"protectboard_id\"])\r\n  |\u003e group()\r\n  |\u003e map(fn: (r) =\u003e ({\r\n      r with\r\n      _field:\r\n        if r._field == \"voltage\" then r.qrcode + \"_Volt\"\r\n        else if r._field == \"temperature\" then r.qrcode + \"_Temp\"\r\n        else if r._field == \"current\" then \"Current\"\r\n        else r._field\r\n  }))\r\n  |\u003e map(fn: (r) =\u003e ({\r\n      r with\r\n      StoreHouseID: r.storehouse_id,\r\n      SerialBoardID: r.serialboard_id,\r\n      ProtectBoardID: r.protectboard_id\r\n  }))\r\n  |\u003e pivot(rowKey: [\"_time\", \"StoreHouseID\", \"SerialBoardID\", \"ProtectBoardID\"], columnKey: [\"_field\"], valueColumn: \"_value\")\r\n  |\u003e drop(columns: [\"_start\", \"_stop\"])",
+                                           "query":  "from(bucket: \"${bucket}\")\r\n  |\u003e range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n\r\n  |\u003e filter(fn: (r) =\u003e r[\"_measurement\"] == \"${meas}\")\r\n\r\n  |\u003e filter(fn: (r) =\u003e\r\n      (${select_export_data_list}) or\r\n      r[\"_field\"] == \"qrcode\" or\r\n      r[\"_field\"] == \"serialboard_id\" or\r\n      r[\"_field\"] == \"protectboard_id\"\r\n  )\r\n\r\n  |\u003e filter(fn: (r) =\u003e\r\n      r[\"storehouse_id\"] == \"${rack_id}\"\r\n  )\r\n  |\u003e filter(fn: (r) =\u003e r[\"pallet_position\"] == \"${pallet_position}\")\r\n\r\n  |\u003e pivot(\r\n      rowKey: [\r\n          \"_time\",\r\n          \"position_id\",\r\n          \"storehouse_id\",\r\n          \"pallet_position\"\r\n      ],\r\n      columnKey: [\"_field\"],\r\n      valueColumn: \"_value\"\r\n  )\r\n\r\n  |\u003e filter(fn: (r) =\u003e\r\n      exists r.qrcode\r\n  )\r\n\r\n  \r\n  |\u003e map(fn: (r) =\u003e ({\r\n      r with\r\n\r\n      StoreHouseID: r.storehouse_id,\r\n\r\n      SerialBoardID:\r\n          if exists r.serialboard_id then\r\n              string(v: r.serialboard_id)\r\n          else\r\n              \"\",\r\n\r\n      ProtectBoardID:\r\n          if exists r.protectboard_id then\r\n              string(v: r.protectboard_id)\r\n          else\r\n              \"\",\r\n\r\n      QRCode:\r\n          string(v: r.qrcode)\r\n  }))\r\n\r\n  |\u003e keep(columns: [\r\n      \"_time\",\r\n\r\n      \"StoreHouseID\",\r\n      \"SerialBoardID\",\r\n      \"ProtectBoardID\",\r\n      \"QRCode\",\r\n\r\n      \"position_id\",\r\n      \"pallet_position\",\r\n\r\n      \"voltage\",\r\n      \"temperature\",\r\n      \"current\"\r\n  ])\r\n\r\n  |\u003e group()",
                                            "refId":  "A"
                                        }
                                    ],
@@ -139,7 +160,7 @@
                        "panels":  [
 
                                   ],
-                       "title":  "${pallet} Pallet - ${serialboard_id} - ${qrcode_list:csv}",
+                       "title":  "${pallet_position} Pallet - ${serialboard_id}",
                        "type":  "row"
                    },
                    {
@@ -191,6 +212,7 @@
                                                                                                    "mode":  "dashed"
                                                                                                }
                                                                        },
+                                                            "displayName":  "${__field.labels._field}",
                                                             "fieldMinMax":  false,
                                                             "mappings":  [
 
@@ -250,8 +272,8 @@
                                                               "uid":  "${DS_INFLUXDB}"
                                                           },
                                            "hide":  false,
-                                           "query":  "from(bucket: \"${bucket}\")\r\n  |\u003e range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |\u003e filter(fn: (r) =\u003e r[\"_measurement\"] == \"${meas}\")\r\n  |\u003e filter(fn: (r) =\u003e r[\"_field\"] == \"voltage\")\r\n  |\u003e filter(fn: (r) =\u003e r[\"storehouse_id\"] == \"${rack_id}\")\r\n  |\u003e filter(fn: (r) =\u003e ${qrcode})\r\n  |\u003e aggregateWindow(\r\n      every: v.windowPeriod,\r\n      fn: last,\r\n      createEmpty: false\r\n  )\r\n  |\u003e keep(columns: [\"_time\", \"_value\", \"qrcode\"])\r\n  |\u003e group(columns: [\"qrcode\"])\r\n",
-                                           "refId":  "A"
+                                           "query":  "import \"date\"\r\nfrom(bucket: \"${bucket}\")\r\n  |\u003e range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |\u003e filter(fn: (r) =\u003e r[\"_measurement\"] == \"${meas}\")\r\n  |\u003e filter(fn: (r) =\u003e\r\n      r[\"_field\"] == \"voltage\" or\r\n      r[\"_field\"] == \"qrcode\"\r\n  )\r\n  |\u003e filter(fn: (r) =\u003e r[\"storehouse_id\"] == \"${rack_id}\")\r\n  |\u003e filter(fn: (r) =\u003e r[\"pallet_position\"] == \"${pallet_position}\")\r\n  |\u003e filter(fn: (r) =\u003e ${position_id_list})\r\n  |\u003e pivot(\r\n      rowKey: [\"_time\", \"position_id\"],\r\n      columnKey: [\"_field\"],\r\n      valueColumn: \"_value\"\r\n  )\r\n  |\u003e filter(fn: (r) =\u003e exists r.voltage and exists r.qrcode)\r\n  |\u003e map(fn: (r) =\u003e ({\r\n      r with\r\n      _value: float(v: r.voltage),\r\n      _field: string(v: r.qrcode)\r\n  }))\r\n  |\u003e drop(columns: [\"voltage\", \"qrcode\"])\r\n  |\u003e group(columns: [\"_field\"])\r\n  |\u003e aggregateWindow(\r\n      every: v.windowPeriod,\r\n      fn: last,\r\n      createEmpty: false\r\n  )",
+                                           "refId":  "B"
                                        }
                                    ],
                        "title":  "Voltage",
@@ -304,6 +326,7 @@
                                                                                                }
                                                                        },
                                                             "decimals":  1,
+                                                            "displayName":  "${__field.labels._field}",
                                                             "mappings":  [
 
                                                                          ],
@@ -355,7 +378,7 @@
                                                               "uid":  "${DS_INFLUXDB}"
                                                           },
                                            "hide":  false,
-                                           "query":  "from(bucket: \"${bucket}\")\r\n  |\u003e range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |\u003e filter(fn: (r) =\u003e r[\"_measurement\"] == \"${meas}\")\r\n  |\u003e filter(fn: (r) =\u003e r[\"_field\"] == \"temperature\")\r\n  |\u003e filter(fn: (r) =\u003e r[\"storehouse_id\"] == \"${rack_id}\")\r\n  |\u003e filter(fn: (r) =\u003e ${qrcode})\r\n  |\u003e aggregateWindow(\r\n      every: v.windowPeriod,\r\n      fn: last,\r\n      createEmpty: false\r\n  )\r\n  |\u003e keep(columns: [\"_time\", \"_value\", \"qrcode\"])\r\n  |\u003e group(columns: [\"qrcode\"])",
+                                           "query":  "import \"date\"\r\nfrom(bucket: \"${bucket}\")\r\n  |\u003e range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |\u003e filter(fn: (r) =\u003e r[\"_measurement\"] == \"${meas}\")\r\n  |\u003e filter(fn: (r) =\u003e\r\n      r[\"_field\"] == \"temperature\" or\r\n      r[\"_field\"] == \"qrcode\"\r\n  )\r\n  |\u003e filter(fn: (r) =\u003e r[\"storehouse_id\"] == \"${rack_id}\")\r\n  |\u003e filter(fn: (r) =\u003e r[\"pallet_position\"] == \"${pallet_position}\")\r\n  |\u003e filter(fn: (r) =\u003e ${position_id_list})\r\n  |\u003e pivot(\r\n      rowKey: [\"_time\", \"position_id\"],\r\n      columnKey: [\"_field\"],\r\n      valueColumn: \"_value\"\r\n  )\r\n  |\u003e filter(fn: (r) =\u003e exists r.temperature and exists r.qrcode)\r\n  |\u003e map(fn: (r) =\u003e ({\r\n      r with\r\n      _value: float(v: r.temperature),\r\n      _field: string(v: r.qrcode)\r\n  }))\r\n  |\u003e drop(columns: [\"temperature\", \"qrcode\"])\r\n  |\u003e group(columns: [\"_field\"])\r\n  |\u003e aggregateWindow(\r\n      every: v.windowPeriod,\r\n      fn: last,\r\n      createEmpty: false\r\n  )",
                                            "refId":  "A"
                                        }
                                    ],
@@ -409,6 +432,7 @@
                                                                                                }
                                                                        },
                                                             "decimals":  1,
+                                                            "displayName":  "${__field.labels._field}",
                                                             "mappings":  [
 
                                                                          ],
@@ -462,7 +486,7 @@
                                                               "uid":  "${DS_INFLUXDB}"
                                                           },
                                            "hide":  false,
-                                           "query":  "from(bucket: \"${bucket}\")\r\n  |\u003e range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |\u003e filter(fn: (r) =\u003e r[\"_measurement\"] == \"${meas}\")\r\n  |\u003e filter(fn: (r) =\u003e r[\"_field\"] == \"current\")\r\n  |\u003e filter(fn: (r) =\u003e r[\"storehouse_id\"] == \"${rack_id}\")\r\n  |\u003e filter(fn: (r) =\u003e ${qrcode})\r\n  |\u003e aggregateWindow(\r\n      every: v.windowPeriod,\r\n      fn: last,\r\n      createEmpty: false\r\n  )\r\n  |\u003e keep(columns: [\"_time\", \"_value\", \"qrcode\"])\r\n  |\u003e group(columns: [\"qrcode\"])",
+                                           "query":  "import \"date\"\r\nfrom(bucket: \"${bucket}\")\r\n  |\u003e range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |\u003e filter(fn: (r) =\u003e r[\"_measurement\"] == \"${meas}\")\r\n  |\u003e filter(fn: (r) =\u003e\r\n      r[\"_field\"] == \"current\" or\r\n      r[\"_field\"] == \"qrcode\"\r\n  )\r\n  |\u003e filter(fn: (r) =\u003e r[\"storehouse_id\"] == \"${rack_id}\")\r\n  |\u003e filter(fn: (r) =\u003e r[\"pallet_position\"] == \"${pallet_position}\")\r\n  |\u003e filter(fn: (r) =\u003e ${position_id_list})\r\n  |\u003e pivot(\r\n      rowKey: [\"_time\", \"position_id\"],\r\n      columnKey: [\"_field\"],\r\n      valueColumn: \"_value\"\r\n  )\r\n  |\u003e filter(fn: (r) =\u003e exists r.current and exists r.qrcode)\r\n  |\u003e map(fn: (r) =\u003e ({\r\n      r with\r\n      _value: float(v: r.current),\r\n      _field: string(v: r.qrcode)\r\n  }))\r\n  |\u003e drop(columns: [\"current\", \"qrcode\"])\r\n  |\u003e group(columns: [\"_field\"])\r\n  |\u003e aggregateWindow(\r\n      every: v.windowPeriod,\r\n      fn: last,\r\n      createEmpty: false\r\n  )",
                                            "refId":  "A"
                                        }
                                    ],
@@ -471,7 +495,7 @@
                        "type":  "timeseries"
                    }
                ],
-    "refresh":  "1s",
+    "refresh":  "5s",
     "schemaVersion":  39,
     "tags":  [
 
@@ -506,7 +530,7 @@
                                                         "text":  "meas_data",
                                                         "value":  "meas_data"
                                                     },
-                                        "hide":  0,
+                                        "hide":  2,
                                         "includeAll":  false,
                                         "label":  "Measurement",
                                         "multi":  false,
@@ -524,35 +548,15 @@
                                         "type":  "custom"
                                     },
                                     {
-                                        "current":  {
-                                                        "selected":  false,
-                                                        "text":  "${VAR_RACK_ID}",
-                                                        "value":  "${VAR_RACK_ID}"
-                                                    },
-                                        "hide":  2,
-                                        "label":  "RackID",
-                                        "name":  "rack_id",
-                                        "options":  [
-                                                        {
-                                                            "selected":  false,
-                                                            "text":  "${VAR_RACK_ID}",
-                                                            "value":  "${VAR_RACK_ID}"
-                                                        }
-                                                    ],
-                                        "query":  "${VAR_RACK_ID}",
-                                        "skipUrlSync":  false,
-                                        "type":  "constant"
-                                    },
-                                    {
-                                        "allValue":  "",
+                                        "allValue":  ".*",
                                         "current":  {
 
                                                     },
                                         "datasource":  {
-                                                           "type":  "influxdb",
-                                                           "uid":  "${DS_INFLUXDB}"
+                                                           "type":  "mssql",
+                                                           "uid":  "${DS_MSSQL}"
                                                        },
-                                        "definition":  "import \"influxdata/influxdb/schema\"\r\n\r\nschema.tagValues(\r\n  bucket: \"${bucket}\",\r\n  predicate: (r) =\u003e r._measurement == \"${meas}\" and r.storehouse_id == \"${rack_id}\" and r.serialboard_id == \"${serialboard_id}\",\r\n  tag: \"qrcode\"\r\n)\r\n|\u003e filter(fn: (r) =\u003e r._value != \"curr\")\r\n|\u003e map(fn: (r) =\u003e ({_value: r._value}))\r\n",
+                                        "definition":  "SELECT DISTINCT\n    m.QRCode AS [__text],\n    m.QRCode AS [__value]\nFROM [BALPS].[dbo].[MeasSessionIndex] AS m\nWHERE m.StoreHouseID = CAST(${rack_id:sqlstring} AS INT)\n  AND m.SerialBoardID IN (${serialboard_id:sqlstring})\n  AND m.PalletPosition IN (${pallet_position:sqlstring})\n  AND m.StartTime \u003e= DATEADD(HOUR, 0, $__timeFrom())\n  AND m.StartTime \u003c= DATEADD(HOUR, 0, $__timeTo())\nORDER BY [__value];",
                                         "hide":  0,
                                         "includeAll":  true,
                                         "label":  "QRcode",
@@ -561,7 +565,7 @@
                                         "options":  [
 
                                                     ],
-                                        "query":  "import \"influxdata/influxdb/schema\"\r\n\r\nschema.tagValues(\r\n  bucket: \"${bucket}\",\r\n  predicate: (r) =\u003e r._measurement == \"${meas}\" and r.storehouse_id == \"${rack_id}\" and r.serialboard_id == \"${serialboard_id}\",\r\n  tag: \"qrcode\"\r\n)\r\n|\u003e filter(fn: (r) =\u003e r._value != \"curr\")\r\n|\u003e map(fn: (r) =\u003e ({_value: r._value}))\r\n",
+                                        "query":  "SELECT DISTINCT\n    m.QRCode AS [__text],\n    m.QRCode AS [__value]\nFROM [BALPS].[dbo].[MeasSessionIndex] AS m\nWHERE m.StoreHouseID = CAST(${rack_id:sqlstring} AS INT)\n  AND m.SerialBoardID IN (${serialboard_id:sqlstring})\n  AND m.PalletPosition IN (${pallet_position:sqlstring})\n  AND m.StartTime \u003e= DATEADD(HOUR, 0, $__timeFrom())\n  AND m.StartTime \u003c= DATEADD(HOUR, 0, $__timeTo())\nORDER BY [__value];",
                                         "refresh":  2,
                                         "regex":  "",
                                         "skipUrlSync":  false,
@@ -571,13 +575,13 @@
                                     {
                                         "current":  {
                                                         "selected":  false,
-                                                        "text":  "Left",
-                                                        "value":  "Left"
+                                                        "text":  "L",
+                                                        "value":  "L"
                                                     },
                                         "hide":  2,
                                         "includeAll":  false,
                                         "multi":  false,
-                                        "name":  "pallet",
+                                        "name":  "pallet_position",
                                         "options":  [
 
                                                     ],
@@ -593,15 +597,15 @@
                                                            "type":  "mssql",
                                                            "uid":  "${DS_MSSQL}"
                                                        },
-                                        "definition":  "WITH raw AS (\n  SELECT \u0027${qrcode_list:csv}\u0027 AS expr\n),\nsplit_expr AS (\n  SELECT r.expr, LTRIM(RTRIM(s.value)) AS value\n  FROM raw r\n  CROSS APPLY STRING_SPLIT(r.expr, \u0027,\u0027) AS s\n)\nSELECT \n  CASE \n    WHEN MIN(LTRIM(RTRIM(expr))) IN (\u0027All\u0027) THEN \u0027true\u0027\n    ELSE STRING_AGG(\u0027r[\"qrcode\"] == \"\u0027 + value + \u0027\"\u0027, \u0027 or \u0027)\n  END AS result\nFROM split_expr;",
+                                        "definition":  "WITH raw AS (\n    SELECT \u0027${qrcode_list:csv}\u0027 AS expr\n),\nsplit_expr AS (\n    SELECT\n        LTRIM(RTRIM(s.value)) AS QRCode\n    FROM raw AS r\n    CROSS APPLY STRING_SPLIT(r.expr, \u0027,\u0027) AS s\n),\nmapped AS (\n    SELECT DISTINCT\n           m.PositionID\n    FROM split_expr AS s\n    INNER JOIN [BALPS].[dbo].[MeasSessionIndex] AS m\n        ON m.QRCode = s.QRCode\n    WHERE m.PositionID IS NOT NULL\n)\nSELECT\n    CASE\n        WHEN \u0027${qrcode_list:text}\u0027 = \u0027All\u0027 THEN\n            \u0027true\u0027\n        ELSE\n            STRING_AGG(\n                \u0027r[\"position_id\"] == \"\u0027 +\n                CAST(PositionID AS NVARCHAR(100)) +\n                \u0027\"\u0027,\n                \u0027 or \u0027\n            )\n    END AS result\nFROM mapped;",
                                         "hide":  2,
                                         "includeAll":  false,
                                         "multi":  false,
-                                        "name":  "qrcode",
+                                        "name":  "position_id_list",
                                         "options":  [
 
                                                     ],
-                                        "query":  "WITH raw AS (\n  SELECT \u0027${qrcode_list:csv}\u0027 AS expr\n),\nsplit_expr AS (\n  SELECT r.expr, LTRIM(RTRIM(s.value)) AS value\n  FROM raw r\n  CROSS APPLY STRING_SPLIT(r.expr, \u0027,\u0027) AS s\n)\nSELECT \n  CASE \n    WHEN MIN(LTRIM(RTRIM(expr))) IN (\u0027All\u0027) THEN \u0027true\u0027\n    ELSE STRING_AGG(\u0027r[\"qrcode\"] == \"\u0027 + value + \u0027\"\u0027, \u0027 or \u0027)\n  END AS result\nFROM split_expr;",
+                                        "query":  "WITH raw AS (\n    SELECT \u0027${qrcode_list:csv}\u0027 AS expr\n),\nsplit_expr AS (\n    SELECT\n        LTRIM(RTRIM(s.value)) AS QRCode\n    FROM raw AS r\n    CROSS APPLY STRING_SPLIT(r.expr, \u0027,\u0027) AS s\n),\nmapped AS (\n    SELECT DISTINCT\n           m.PositionID\n    FROM split_expr AS s\n    INNER JOIN [BALPS].[dbo].[MeasSessionIndex] AS m\n        ON m.QRCode = s.QRCode\n    WHERE m.PositionID IS NOT NULL\n)\nSELECT\n    CASE\n        WHEN \u0027${qrcode_list:text}\u0027 = \u0027All\u0027 THEN\n            \u0027true\u0027\n        ELSE\n            STRING_AGG(\n                \u0027r[\"position_id\"] == \"\u0027 +\n                CAST(PositionID AS NVARCHAR(100)) +\n                \u0027\"\u0027,\n                \u0027 or \u0027\n            )\n    END AS result\nFROM mapped;",
                                         "refresh":  1,
                                         "regex":  "",
                                         "skipUrlSync":  false,
@@ -611,11 +615,12 @@
                                     {
                                         "current":  {
                                                         "selected":  false,
-                                                        "text":  "A0001",
-                                                        "value":  "A0001"
+                                                        "text":  "",
+                                                        "value":  ""
                                                     },
                                         "hide":  2,
                                         "includeAll":  false,
+                                        "label":  "",
                                         "multi":  false,
                                         "name":  "serialboard_id",
                                         "options":  [
@@ -690,17 +695,35 @@
                                     {
                                         "current":  {
                                                         "selected":  false,
-                                                        "text":  "192.168.127.100",
-                                                        "value":  "192.168.127.100"
+                                                        "text":  "192.168.127.110",
+                                                        "value":  "192.168.127.110"
                                                     },
                                         "hide":  2,
                                         "name":  "ip",
                                         "options":  [
 
                                                     ],
-                                        "query":  "192.168.127.100",
+                                        "query":  "192.168.127.110",
                                         "skipUrlSync":  false,
                                         "type":  "textbox"
+                                    },
+                                    {
+                                        "current":  {
+                                                        "selected":  false,
+                                                        "text":  "1",
+                                                        "value":  "1"
+                                                    },
+                                        "hide":  2,
+                                        "includeAll":  false,
+                                        "multi":  false,
+                                        "name":  "rack_id",
+                                        "options":  [
+
+                                                    ],
+                                        "query":  "",
+                                        "queryValue":  "",
+                                        "skipUrlSync":  false,
+                                        "type":  "custom"
                                     }
                                 ]
                    },
@@ -727,25 +750,7 @@
                    },
     "timezone":  "",
     "title":  "RealTime Cell Data",
-    "uid":  "ceqs9fdv8ni80a",
-    "version":  6,
-    "weekStart":  "",
-    "__inputs":  [
-                     {
-                         "name":  "DS_INFLUXDB",
-                         "label":  "InfluxDB",
-                         "description":  "",
-                         "type":  "datasource",
-                         "pluginId":  "influxdb",
-                         "pluginName":  "InfluxDB"
-                     },
-                     {
-                         "name":  "DS_MSSQL",
-                         "label":  "MSSQL",
-                         "description":  "",
-                         "type":  "datasource",
-                         "pluginId":  "mssql",
-                         "pluginName":  "Microsoft SQL Server"
-                     }
-                 ]
+    "uid":  "bquFxBhddG",
+    "version":  1,
+    "weekStart":  ""
 }

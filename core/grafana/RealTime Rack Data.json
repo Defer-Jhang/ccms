@@ -1,4 +1,22 @@
 ﻿{
+    "__inputs":  [
+                     {
+                         "name":  "DS_INFLUXDB",
+                         "label":  "InfluxDB",
+                         "description":  "",
+                         "type":  "datasource",
+                         "pluginId":  "influxdb",
+                         "pluginName":  "InfluxDB"
+                     },
+                     {
+                         "name":  "DS_MSSQL",
+                         "label":  "MSSQL",
+                         "description":  "",
+                         "type":  "datasource",
+                         "pluginId":  "mssql",
+                         "pluginName":  "Microsoft SQL Server"
+                     }
+                 ],
     "annotations":  {
                         "list":  [
                                      {
@@ -106,7 +124,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=48\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=48\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -235,7 +253,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=47\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=47\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -364,7 +382,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=46\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=46\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -493,7 +511,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=45\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=45\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -622,7 +640,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=44\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=44\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -751,7 +769,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=43\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=43\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -880,7 +898,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=1\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=1\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -1009,7 +1027,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=2\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=2\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -1138,7 +1156,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=3\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=3\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -1267,7 +1285,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=4\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=4\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -1396,7 +1414,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=5\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=5\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -1525,7 +1543,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=6\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=6\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -1669,7 +1687,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=54\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=54\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -1798,7 +1816,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=53\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=53\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -1927,7 +1945,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=52\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=52\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -2056,7 +2074,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=51\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=51\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -2185,7 +2203,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=50\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=50\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -2314,7 +2332,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=49\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=49\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -2443,7 +2461,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=7\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=7\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -2572,7 +2590,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=8\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=8\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -2701,7 +2719,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=9\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=9\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -2830,7 +2848,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=10\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=10\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -2959,7 +2977,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=11\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=11\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -3088,7 +3106,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=12\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=12\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -3228,7 +3246,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=60\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=60\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -3357,7 +3375,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=59\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=59\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -3486,7 +3504,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=58\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=58\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -3615,7 +3633,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=57\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=57\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -3744,7 +3762,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=56\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=56\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -3873,7 +3891,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=55\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=55\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -4002,7 +4020,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=13\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=13\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -4131,7 +4149,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=14\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=14\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -4260,7 +4278,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=15\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=15\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -4389,7 +4407,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=16\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=16\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -4518,7 +4536,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=17\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=17\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -4647,7 +4665,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=18\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=18\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -4787,7 +4805,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=66\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=66\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -4916,7 +4934,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=65\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=65\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -5045,7 +5063,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=64\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=64\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -5174,7 +5192,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=63\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=63\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -5303,7 +5321,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=62\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=62\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -5432,7 +5450,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=61\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=61\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -5561,7 +5579,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=19\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=19\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -5690,7 +5708,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=20\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=20\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -5819,7 +5837,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=21\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=21\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -5948,7 +5966,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=22\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=22\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -6077,7 +6095,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=23\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=23\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -6206,7 +6224,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=24\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=24\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -6346,7 +6364,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=72\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=72\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -6475,7 +6493,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=71\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=71\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -6604,7 +6622,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=70\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=70\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -6733,7 +6751,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=69\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=69\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -6862,7 +6880,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=68\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=68\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -6991,7 +7009,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=67\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=67\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -7120,7 +7138,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=25\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=25\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -7249,7 +7267,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=26\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=26\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -7378,7 +7396,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=27\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=27\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -7507,7 +7525,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=28\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=28\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -7636,7 +7654,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=29\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=29\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -7765,7 +7783,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=30\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=30\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -7905,7 +7923,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=78\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=78\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -8034,7 +8052,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=77\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=77\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -8163,7 +8181,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=76\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=76\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -8292,7 +8310,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=75\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=75\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -8421,7 +8439,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=74\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=74\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -8550,7 +8568,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=73\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=73\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -8679,7 +8697,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=31\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=31\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -8808,7 +8826,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=32\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=32\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -8937,7 +8955,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=33\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=33\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -9066,7 +9084,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=34\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=34\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -9195,7 +9213,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=35\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=35\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -9324,7 +9342,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=36\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=36\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -9468,7 +9486,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=84\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=84\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -9597,7 +9615,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=83\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=83\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -9726,7 +9744,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=82\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=82\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -9855,7 +9873,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=81\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=81\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -9984,7 +10002,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=80\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=80\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -10113,7 +10131,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=79\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=79\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -10242,7 +10260,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=37\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=37\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -10371,7 +10389,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=38\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=38\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -10500,7 +10518,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=39\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=39\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -10629,7 +10647,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=40\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=40\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -10758,7 +10776,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=41\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=41\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -10887,7 +10905,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-1h\u0026to=now\u0026var-rack_id=42\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=5s\u0026from=now-3h\u0026to=now\u0026var-rack_id=42\u0026var-ip=${ip}"
                                      }
                                  ],
                        "options":  {
@@ -10999,7 +11017,9 @@
                                     },
                                     {
                                         "current":  {
-
+                                                        "selected":  false,
+                                                        "text":  "1",
+                                                        "value":  "1"
                                                     },
                                         "datasource":  {
                                                            "type":  "influxdb",
@@ -11024,7 +11044,9 @@
                                     {
                                         "allValue":  "",
                                         "current":  {
-
+                                                        "selected":  false,
+                                                        "text":  "All",
+                                                        "value":  "$__all"
                                                     },
                                         "datasource":  {
                                                            "type":  "influxdb",
@@ -11049,7 +11071,9 @@
                                     {
                                         "allValue":  "",
                                         "current":  {
-
+                                                        "selected":  false,
+                                                        "text":  "All",
+                                                        "value":  "$__all"
                                                     },
                                         "datasource":  {
                                                            "type":  "influxdb",
@@ -11074,7 +11098,9 @@
                                     {
                                         "allValue":  "",
                                         "current":  {
-
+                                                        "selected":  false,
+                                                        "text":  "All",
+                                                        "value":  "$__all"
                                                     },
                                         "datasource":  {
                                                            "type":  "influxdb",
@@ -11099,7 +11125,9 @@
                                     {
                                         "allowCustomValue":  false,
                                         "current":  {
-
+                                                        "selected":  false,
+                                                        "text":  "r[\"storehouse_id\"] == \"50\" or r[\"storehouse_id\"] == \"51\"",
+                                                        "value":  "r[\"storehouse_id\"] == \"50\" or r[\"storehouse_id\"] == \"51\""
                                                     },
                                         "datasource":  {
                                                            "type":  "mssql",
@@ -11123,7 +11151,9 @@
                                     },
                                     {
                                         "current":  {
-
+                                                        "selected":  false,
+                                                        "text":  "All",
+                                                        "value":  "$__all"
                                                     },
                                         "datasource":  {
                                                            "type":  "mssql",
@@ -11148,22 +11178,22 @@
                                     {
                                         "current":  {
                                                         "selected":  false,
-                                                        "text":  "192.168.127.100",
-                                                        "value":  "192.168.127.100"
+                                                        "text":  "localhost",
+                                                        "value":  "localhost"
                                                     },
                                         "hide":  2,
                                         "name":  "ip",
                                         "options":  [
 
                                                     ],
-                                        "query":  "192.168.127.100",
+                                        "query":  "localhost",
                                         "skipUrlSync":  false,
                                         "type":  "textbox"
                                     }
                                 ]
                    },
     "time":  {
-                 "from":  "now-1h",
+                 "from":  "now-3h",
                  "to":  "now"
              },
     "timepicker":  {
@@ -11186,25 +11216,7 @@
                    },
     "timezone":  "",
     "title":  "RealTime Rack Data",
-    "uid":  "cerdu2ezr0kqob",
-    "version":  4,
-    "weekStart":  "",
-    "__inputs":  [
-                     {
-                         "name":  "DS_MSSQL",
-                         "label":  "MSSQL",
-                         "description":  "",
-                         "type":  "datasource",
-                         "pluginId":  "mssql",
-                         "pluginName":  "Microsoft SQL Server"
-                     },
-                     {
-                         "name":  "DS_INFLUXDB",
-                         "label":  "InfluxDB",
-                         "description":  "",
-                         "type":  "datasource",
-                         "pluginId":  "influxdb",
-                         "pluginName":  "InfluxDB"
-                     }
-                 ]
+    "uid":  "VoLeCUAGAy",
+    "version":  1,
+    "weekStart":  ""
 }

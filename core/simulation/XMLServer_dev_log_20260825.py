@@ -1196,28 +1196,6 @@ class XMLSocketServer:
         except Exception:
             self.logging.error(f"check_task_status failed\n{self.logger.get_slim_error_log()}")
 
-    
-    def debug_query_latest_board_status_flux(
-        self,
-        serialboard_id: str,
-        field_name: str,
-        measurement: str | None = None,
-        lookback_sec: int = 30,
-        exclude_qrcode_curr: bool = True,
-    ):    
-        
-        """
-        Debug wrapper:
-        保留舊的 debug function 名稱，但實際查詢改走正式版 query_latest_board_status_flux。
-        """
-        return self.query_latest_board_status_flux(
-            serialboard_id=serialboard_id,
-            field_name=field_name,
-            measurement=measurement,
-            lookback_sec=lookback_sec,
-            exclude_qrcode_curr=exclude_qrcode_curr,
-        )
-
     def query_latest_board_status_flux(
         self,
         protectboard_id: str,
@@ -1308,78 +1286,74 @@ class XMLSocketServer:
             )
             return None
 
-        
+    # def query_latest_board_status(
+    #     self,
+    #     measurement: str,
+    #     serialboard_id: str,
+    #     fields: list[str],
+    #     lookback_sec: int = 86400,
+    # ):
+    #     """
+    #     正式流程用：查指定 serialboard_id 最近一段時間的最後一筆資料
+    #     """
+    #     try:
+    #         import pandas as pd
+    #         from datetime import datetime, timedelta, timezone
 
-    def query_latest_board_status(
-        self,
-        measurement: str,
-        serialboard_id: str,
-        fields: list[str],
-        lookback_sec: int = 86400,
-    ):
-        """
-        正式流程用：查指定 serialboard_id 最近一段時間的最後一筆資料
-        """
-        try:
-            import pandas as pd
-            from datetime import datetime, timedelta, timezone
+    #         end_dt = datetime.now(timezone.utc)
+    #         start_dt = end_dt - timedelta(seconds=lookback_sec)
 
-            end_dt = datetime.now(timezone.utc)
-            start_dt = end_dt - timedelta(seconds=lookback_sec)
+    #         start_time = start_dt.isoformat().replace("+00:00", "Z")
+    #         end_time = end_dt.isoformat().replace("+00:00", "Z")
 
-            start_time = start_dt.isoformat().replace("+00:00", "Z")
-            end_time = end_dt.isoformat().replace("+00:00", "Z")
+    #         df = self.influxdb_obj.read_pd_influxdb(
+    #             start_time=start_time,
+    #             end_time=end_time,
+    #             bucket=self.influxdb_obj.bucket,
+    #             meas=measurement,
+    #             fields=fields,
+    #         )
 
-            df = self.influxdb_obj.read_pd_influxdb(
-                start_time=start_time,
-                end_time=end_time,
-                bucket=self.influxdb_obj.bucket,
-                meas=measurement,
-                fields=fields,
-            )
+    #         if isinstance(df, list):
+    #             df = pd.concat(
+    #                 [x for x in df if isinstance(x, pd.DataFrame) and not x.empty],
+    #                 ignore_index=True,
+    #             ) if df else pd.DataFrame()
 
-            if isinstance(df, list):
-                df = pd.concat(
-                    [x for x in df if isinstance(x, pd.DataFrame) and not x.empty],
-                    ignore_index=True,
-                ) if df else pd.DataFrame()
+    #         if not isinstance(df, pd.DataFrame) or df.empty:
+    #             return None
 
-            if not isinstance(df, pd.DataFrame) or df.empty:
-                return None
+    #         drop_cols = [c for c in ["result", "table"] if c in df.columns]
+    #         if drop_cols:
+    #             df = df.drop(columns=drop_cols)
 
-            drop_cols = [c for c in ["result", "table"] if c in df.columns]
-            if drop_cols:
-                df = df.drop(columns=drop_cols)
+    #         if "_time" in df.columns and "datetime" not in df.columns:
+    #             df["datetime"] = pd.to_datetime(df["_time"], errors="coerce")
+    #         elif "datetime" in df.columns:
+    #             df["datetime"] = pd.to_datetime(df["datetime"], errors="coerce")
 
-            if "_time" in df.columns and "datetime" not in df.columns:
-                df["datetime"] = pd.to_datetime(df["_time"], errors="coerce")
-            elif "datetime" in df.columns:
-                df["datetime"] = pd.to_datetime(df["datetime"], errors="coerce")
+    #         if "serialboard_id" not in df.columns:
+    #             return None
 
-            if "serialboard_id" not in df.columns:
-                return None
+    #         df["serialboard_id"] = df["serialboard_id"].astype(str)
+    #         df = df[df["serialboard_id"] == str(serialboard_id)]
 
-            df["serialboard_id"] = df["serialboard_id"].astype(str)
-            df = df[df["serialboard_id"] == str(serialboard_id)]
+    #         if df.empty:
+    #             return None
 
-            if df.empty:
-                return None
+    #         sort_col = "datetime" if "datetime" in df.columns else "_time"
+    #         df = df.sort_values(sort_col)
 
-            sort_col = "datetime" if "datetime" in df.columns else "_time"
-            df = df.sort_values(sort_col)
+    #         latest = df.iloc[-1].to_dict()
 
-            latest = df.iloc[-1].to_dict()
+    #         if "datetime" in latest and pd.notna(latest["datetime"]):
+    #             latest["datetime"] = str(latest["datetime"])
 
-            if "datetime" in latest and pd.notna(latest["datetime"]):
-                latest["datetime"] = str(latest["datetime"])
+    #         return latest
 
-            return latest
-
-        except Exception:
-            self.logging.error(f"query_latest_board_status failed\n{self.logger.get_slim_error_log()}")
-            return None
-        
-
+    #     except Exception:
+    #         self.logging.error(f"query_latest_board_status failed\n{self.logger.get_slim_error_log()}")
+    #         return None
     
     def get_current_measurement_name(self, prefix: str = "data", use_utc: bool = False):
         """
@@ -1716,7 +1690,10 @@ class XMLSocketServer:
                                         notified_socket.sendall(struct.pack(">I", len(request_xml)) + request_xml)
 
                                     elif current_cmd == "w2005":
-                                        request_xml = self.create_request_w2005_xml("JudgmentCompletionNotificationRequest", tid, trxid, sh_id)
+                                        request_xml = self.create_request_w2005_xml("JudgmentCompletionNotificationRequest",
+                                                                                    tid,
+                                                                                    trxid,
+                                                                                    sh_id)
                                         self.logging.debug(f"[Send] W2005Req | None | {sh_id} | {tid[-6:]} | {trxid[-6:]}")
                                         notified_socket.sendall(struct.pack(">I", len(request_xml)) + request_xml)
 
@@ -1993,18 +1970,6 @@ class XMLSocketServer:
 
         ranges.append((start, prev))
         return ranges
-    
-
-    # def rack_to_serialboard_ids(self, rack: int) -> list[str]:
-    #     """
-    #     rack 與 serialboard_id 的對應規則：
-    #     rack 1 -> A0001, A0002
-    #     rack 2 -> A0003, A0004
-    #     rack 3 -> A0005, A0006
-    #     ...
-    #     """
-    #     first_num = (rack - 1) * 2 + 1
-    #     return [f"A{first_num:04d}", f"A{first_num + 1:04d}"]
 
     def rack_to_task_names(self, rack: int) -> list[str]:
         """

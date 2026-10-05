@@ -1,0 +1,64 @@
+{
+    "meas": [
+        {
+            "variable": {
+                "rand_start_volt_min": 3.5,
+                "rand_start_volt_max": 3.55,
+                "volt_unit": 0.01,
+                "rand_start_temp_min": 3.5,
+                "rand_start_temp_max": 3.55,
+                "temp_unit": 0.01,
+                "mpd_heartbeat_timeout": 60,
+                "standby_heartbeat_timeout": 7200
+            },
+            "db_out": [
+                {
+                    "table": [
+                        "StoreHouseCellMeas"
+                    ],
+                    "field": [
+                        "datetime",
+                        "storehouse_id",
+                        "pallet_position",
+                        "serialboard_id",
+                        "position_id",
+                        "qrcode",
+                        "return_code",
+                        "voltage",
+                        "temperature",
+                        "current",
+                        "error_code",
+                        "protectboard_id",
+                        "wire_voltage_status",
+                        "fetstate",
+                        "fuse",
+                        "afe",
+                        "wifistdisconn",
+                        "wifiltdisconn",
+                        "socketstdisconn",
+                        "socketltdisconn",
+                        "heartbeattxcount",
+                        "heartbeatlosscount",
+                        "heartbeatlastrttms",
+                        "heartbeattrttmaxms",
+                        "heatbeattimeoutflag",
+                        "wifireconnlastms",
+                        "wifireconnavgms",
+                        "wifireconntimes",
+                        "socketreconnlastms",
+                        "socketreconnavgms",
+                        "socketreconnmaxms",
+                        "socketreconntimes",
+                        "error_code_curr",
+                        "wire_voltage_1",
+                        "wire_voltage_2",
+                        "wire_voltage_3",
+                        "wire_voltage_4",
+                        "wire_voltage_5"
+                    ]
+                    
+                }
+            ]
+        }
+    ]
+}

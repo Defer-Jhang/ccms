@@ -1,4 +1,22 @@
 ﻿{
+    "__inputs":  [
+                     {
+                         "name":  "DS_INFLUXDB",
+                         "label":  "InfluxDB",
+                         "description":  "",
+                         "type":  "datasource",
+                         "pluginId":  "influxdb",
+                         "pluginName":  "InfluxDB"
+                     },
+                     {
+                         "name":  "DS_MSSQL",
+                         "label":  "MSSQL",
+                         "description":  "",
+                         "type":  "datasource",
+                         "pluginId":  "mssql",
+                         "pluginName":  "Microsoft SQL Server"
+                     }
+                 ],
     "annotations":  {
                         "list":  [
                                      {
@@ -95,7 +113,7 @@
                                      {
                                          "targetBlank":  true,
                                          "title":  "",
-                                         "url":  "http://${ip}:3000/d/feqogk55wni80d/ccms-cell-monitor?orgId=1\u0026refresh=1s\u0026from=now-30s\u0026to=now\u0026var-rack_id=${alarm_rack_list}\u0026var-ip=${ip}"
+                                         "url":  "http://${ip}:3000/d/9wgALQ76D6/ccms-cell-monitor?orgId=1\u0026refresh=1s\u0026from=now-30s\u0026to=now\u0026var-rack_id=${alarm_rack_list}\u0026var-ip=${ip}"
                                      }
                                  ],
                        "maxPerRow":  2,
@@ -359,15 +377,15 @@
                                     {
                                         "current":  {
                                                         "selected":  false,
-                                                        "text":  "192.168.127.100",
-                                                        "value":  "192.168.127.100"
+                                                        "text":  "localhost",
+                                                        "value":  "localhost"
                                                     },
                                         "hide":  2,
                                         "name":  "ip",
                                         "options":  [
 
                                                     ],
-                                        "query":  "192.168.127.100",
+                                        "query":  "localhost",
                                         "skipUrlSync":  false,
                                         "type":  "textbox"
                                     }
@@ -397,25 +415,7 @@
                    },
     "timezone":  "",
     "title":  "Alarm Rack Query",
-    "uid":  "4037602e-1d0a-41fc-ab22-896bc2e8fe9b",
-    "version":  4,
-    "weekStart":  "",
-    "__inputs":  [
-                     {
-                         "name":  "DS_MSSQL",
-                         "label":  "MSSQL",
-                         "description":  "",
-                         "type":  "datasource",
-                         "pluginId":  "mssql",
-                         "pluginName":  "Microsoft SQL Server"
-                     },
-                     {
-                         "name":  "DS_INFLUXDB",
-                         "label":  "InfluxDB",
-                         "description":  "",
-                         "type":  "datasource",
-                         "pluginId":  "influxdb",
-                         "pluginName":  "InfluxDB"
-                     }
-                 ]
+    "uid":  "tLoY2c26j4",
+    "version":  1,
+    "weekStart":  ""
 }
